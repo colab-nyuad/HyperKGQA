@@ -15,7 +15,7 @@ source set_env.sh
 ### Datasets
 
 ### Usage
-**
+#
 To train and evaluate a QA task over KG, use the main.py script:
 
 ```sh
