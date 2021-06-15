@@ -2,7 +2,7 @@
 
 ```sh
 # retrieve and install project in development mode
-git clone https://github.com/uma-pi1/kge.git
+git clone https://github.com/colab-nyuad/Hyperbolic_KGQA.git
 cd kge
 pip install -e .
 
