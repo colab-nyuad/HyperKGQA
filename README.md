@@ -15,16 +15,15 @@ source set_env.sh
 ### Datasets
 
 ### Usage
-******
 To train and evaluate a QA task over KG, use the main.py script:
 
 ```sh
-usage: main.py [-h] [--dataset {FB15K,WN,WN18RR,FB237,YAGO3-10}]
-              [--model {TransE,CP,MurE,RotE,RefE,AttE,RotH,RefH,AttH,ComplEx,RotatE}]
+usage: main.py [-h] [--dataset {MetaQA,fbwq}]
+              [--model {TransE,RESCAL,CP,Distmult,SimplE,RotH,RefH,AttH,ComplEx,RotatE}]
               [--regularizer {N3,N2}] [--reg REG]
-              [--optimizer {Adagrad,Adam,SGD,SparseAdam,RSGD,RAdam}]
-              [--max_epochs MAX_EPOCHS] [--patience PATIENCE] [--valid VALID]
-              [--rank RANK] [--batch_size BATCH_SIZE]
+              [--optimizer {Adagrad,Adam}]
+              [--max_epochs MAX_EPOCHS] [--valid_every VALID]
+              [--dim RANK] [--batch_size BATCH_SIZE]
               [--neg_sample_size NEG_SAMPLE_SIZE] [--dropout DROPOUT]
               [--init_size INIT_SIZE] [--learning_rate LEARNING_RATE]
               [--gamma GAMMA] [--bias {constant,learn,none}]
