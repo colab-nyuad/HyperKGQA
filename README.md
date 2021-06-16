@@ -69,3 +69,23 @@ optional arguments:
 ### Experiments
 
 ### Computing graph curvature
+Two metrics are available to estimate how hierarchical relations in a knowledge graph are.  is: the curvature estimate ξG and the Krackhardt hierarchy score KhsG. While the curvature
+estimate captures global hierarchical behaviours
+(how much the graph is tree-like when zoomingout), the Krackhardt score captures a more local
+behaviour (how many small loops the graph has).
+
+```sh
+usage: graph_curvature.py [-h] [--dataset DATASET]
+              [--kg_type KG_TYPE]
+              [--curvature_type CURVATURE_TYPE]
+              [--relation RELATION]
+```
+
+Following is an example command to compute the Krackhardt hierarchy score for all relation in a KG: 
+```
+python graph_curvature.py --dataset MetaQA --kg_type half --curvature_type krackhardt
+```
+For a specific relation:
+```
+python graph_curvature.py --dataset MetaQA --kg_type half --curvature_type krackhardt --relation _instance_hypernym
+```
