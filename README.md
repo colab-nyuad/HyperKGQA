@@ -76,7 +76,10 @@ usage: graph_curvature.py [-h] [--dataset DATASET]
                           [--curvature_type {'krackhardt', 'global_curvature'}] 
                           [--relation RELATION]
 ```
-
+If computing graph curvature is done before link prediction or separatly, plese make sure that the name of the dataset is according to the format <dataset>_<kg_type> and is placed inside the folder kge/data. To preprocess the dataset run the following command inside the folder data:
+```
+python preprocess/preprocess_default.py <dataset>_<kg_type>
+```
 Following is an example command to compute the Krackhardt hierarchy score for all relations in a KG: 
 ```
 python graph_curvature.py --dataset MetaQA --kg_type half --curvature_type krackhardt
