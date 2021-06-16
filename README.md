@@ -12,8 +12,47 @@ pip install -e .
 cd ..
 source set_env.sh
 ```
+### Avilable models
+This implementation includes the following models:
+- ComplEx [1]
+- RotataE [2]
+- TransE [3]
+- Simple [4]
+- CP [5]
+- RESCAL [6]
+- DistMult [7]
+- RotH [8]
+- RefH [8]
+- AttH [8]
 
 ### Datasets
+KG dataset
+There are 2 datasets: MetaQA_full and MetaQA_half. Full dataset contains the original kb.txt as train.txt with duplicate triples removed. Half contains only 50% of the triples (randomly selected without replacement). Please refer to the baseline paper for details on how sparse MetaQA dataset and 
+
+There are some lines like 'entity NOOP entity' in the train.txt for half dataset. This is because when removing the triples, all triples for that entity were removed, hence any KG embedding implementation would not find any embedding vector for them using the train.txt file. By including such 'NOOP' triples we are not including any additional information regarding them from the KG, it is there just so that we can directly use any embedding implementation to generate some random vector for them.
+
+QA Dataset
+There are 5 files for each dataset (1, 2 and 3 hop)
+
+qa_train_{n}hop_train.txt
+qa_train_{n}hop_train_half.txt
+qa_train_{n}hop_train_old.txt
+qa_dev_{n}hop.txt
+qa_test_{n}hop.txt
+Out of these, qa_dev, qa_test and qa_train_{n}hop_old are exactly the same as the MetaQA original dev, test and train files respectively.
+
+For qa_train_{n}hop_train and qa_train_{n}hop_train_half, we have added triple (h, r, t) in the form of (head entity, question, answer). This is to prevent the model from 'forgetting' the entity embeddings when it is training the QA model using the QA dataset. qa_train.txt contains all triples, while qa_train_half.txt contains only triples from MetaQA_half.
+
+WebQuestionsSP
+KG dataset
+There are 2 datasets: fbwq_full and fbwq_half
+
+Creating fbwq_full: We restrict the KB to be a subset of Freebase which contains all facts that are within 2-hops of any entity mentioned in the questions of WebQuestionsSP. We further prune it to contain only those relations that are mentioned in the dataset. This smaller KB has 1.8 million entities and 5.7 million triples.
+
+Creating fbwq_half: We randomly sample 50% of the edges from fbwq_full.
+
+QA Dataset
+Same as the original WebQuestionsSP QA dataset.
 
 ### Usage
 To train and evaluate a QA task over KG, use the main.py script:
@@ -100,6 +139,7 @@ python main.py --embeddings data/pretrained_models/embeddings/fbwq/ComplEx_fbwq_
   
 ### Experiments
 
+
 ### Computing graph curvature
 Two metrics are available to estimate how hierarchical relations in a KG are: the curvature estimate and the Krackhardt hierarchy score. The curvature estimate captures global hierarchical behaviours (how much the graph is tree-like) and the Krackhardt score reflects more local behaviour (how many small loops the graph has). For details on computing metrics please refer to [Low-Dimensional Hyperbolic Knowledge Graph Embeddings](https://arxiv.org/abs/2005.00545) and [Learning mixed-curvature representations in product spaces](https://openreview.net/pdf?id=HJxeWnCcF7). To compute the metrics, use the graph_curvature.py script with the following arguments:
 ```sh
@@ -131,3 +171,4 @@ python graph_curvature.py --dataset MetaQA --kg_type half --curvature_type krack
 ### How to cite
   
 ### References
+
