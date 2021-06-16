@@ -32,7 +32,7 @@ usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
               [--learning_rate_kgqa LEARNING_RATE]
               [--freeze FREEZE] [--use_cuda USE_CUDA]
 
-Knowledge Graph Embedding
+Knowledge Graph QA
 
 optional arguments:
   -h, --help            show this help message and exit
