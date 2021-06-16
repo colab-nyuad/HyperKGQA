@@ -96,3 +96,6 @@ or for a specific relation:
 ```
 python graph_curvature.py --dataset MetaQA --kg_type half --curvature_type krackhardt --relation _instance_hypernym
 ```
+### How to cite
+  
+### References
