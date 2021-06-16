@@ -78,10 +78,13 @@ arguments:
                         Use relation matching for postprocessing candidates in QA task
 ```
 
-Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over the KG. To compute the embeddings, LibKGE needs a config file with specified parameters as learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc. The script checks if there is an uploaded config file in the fomrat <dataset>_<kg_type>_<model>_<dim> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. Following is an example command to run tarining KG embedding and QA task: 
+Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat <dataset>\_<kg_type>\_<model>\_<dim> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
 
 ```
+python main.py --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
 ```
+  
+
 
 
 ### Experiments
@@ -102,7 +105,7 @@ arguments:
   --curvature_type      Curvature metric to compute ('krackhardt' for Krackhardt hierarchy score, 'global_curvature' for curvature estimate)
   --relation            Specific relation
 ```
-If computing graph curvature is done before link prediction or separatly, plese make sure that the name of the dataset is according to the format <dataset>_<kg_type> and is placed inside the folder kge/data. To preprocess the dataset run the following command inside the folder data:
+If computing graph curvature is done before link prediction or separatly, plese make sure that the name of the dataset is according to the format <dataset>\_<kg_type> and is placed inside the folder kge/data. To preprocess the dataset run the following command inside the folder data:
 ```
 python preprocess/preprocess_default.py <dataset>_<kg_type>
 ```
