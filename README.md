@@ -1,5 +1,5 @@
 ## HyperbolicKGQA
-HyperKGQA,  proposes a technique that embeds a Knowledge Graph into the hyperbolic space  and  leverages  this  pre-trained  embeddings  to  map  questions' representation  into entities  and  relationships  space. An extensive set of experiments was run on two benchmark datasets using code published in this repository. The results show that the proposed  method  performs  significantly  better  than the state-of-the-art tehcniqiues, especially when reasoning is on arbitrary multi-hop questions over large sparse graphs embedded into a low-dimensional representation.
+HyperKGQA proposes a technique that embeds a Knowledge Graph into the hyperbolic space  and  leverages  this  pre-trained  embeddings  to  map  questions' representation  into entities  and  relationships  space. An extensive set of experiments was run on two benchmark datasets using code published in this repository. The results show that the proposed  method  performs  significantly  better  than the state-of-the-art techniques, especially when reasoning is on arbitrary multi-hop questions over large sparse graphs embedded into a low-dimensional representation.
 
 ### Installation
 ```sh
@@ -39,7 +39,7 @@ usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
  
 Knowledge Graph QA
 
-optional arguments:
+arguments:
   -h, --help            show this help message and exit
   --dataset             Knowledge Graph dataset
   --kg_type             Type of graph (full, sparse)
@@ -59,7 +59,7 @@ optional arguments:
   --kg_batch_size       Batch size for computing KG embeddings 
   --learning_rate_kgqa  Learning rate for QA task
   --learning_rate_kge   Learning rate for computing KG embeddings
-  --hops                Number of edges to reson over to reach the answer
+  --hops                Number of edges to reason over to reach the answer
   --ent_dropout         Entity Dropout rate used in QA score function 
   --rel_dropout         Relation Dropout rate used in QA score function
   --score_dropout       Score Dropout rate used in QA score function
@@ -73,10 +73,16 @@ optional arguments:
   --init_size           Initial embeddings' scale for hyperbolic embeddings
   --embeddings          Path to the folder with computed embeddings for KG
   --qa_nn_type {LSTM,RoBERTa}
-                        Which NN to use for question ebmeddings
+                        Which NN to use for question embeddings
   --use_relation_matching 
                         Use relation matching for postprocessing candidates in QA task
 ```
+
+Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over the KG. To compute the embeddings, LibKGE needs a config file with specified parameters as learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc. The script checks if there is an uploaded config file in the fomrat <dataset>_<kg_type>_<model>_<dim> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. Following is an example command to run tarining KG embedding and QA task: 
+
+```
+```
+
 
 ### Experiments
 
