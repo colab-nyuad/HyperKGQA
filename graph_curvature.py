@@ -24,7 +24,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--curvature_type", type=str, default='krackhardt', help = "Curvature type"
+    "--curvature_type", type=str, default='krackhardt', choices=['krackhardt', 'global_curvature'], help = "Curvature type"
 )
 
 parser.add_argument(
@@ -34,8 +34,8 @@ parser.add_argument(
 qa_data_path = os.environ['DATA_PATH']
 kge_path = os.environ['KGE_PATH']
 
-def compute_krackhardt_hierarchy_curvature(samples):
-    sub_graph = create_graph(samples)
+def compute_krackhardt_hierarchy_curvature(samples, entity_dict):
+    sub_graph = create_graph(samples, entity_dict)
     A = nx.to_numpy_matrix(sub_graph, dtype=int).tolist()
     num = np.sum([A[i][j] * (1-A[j][i]) for i in range(len(A)) for j in range(len(A))])
     denum = np.sum(A)
@@ -43,16 +43,17 @@ def compute_krackhardt_hierarchy_curvature(samples):
 
     return curv
 
-def compute_krackhardt_hierarchy_score(samples, relations_dict, relation):
+def compute_krackhardt_hierarchy_score(samples, relations_dict, entity_dict, relation):
 
     if relation is 'all':
        for k,v in relations_dict.items():
-           mask = samples[:, 1] == v
+           mask = samples[:, 1] == k
            r_samples = samples[mask, :]
-           curv = compute_krackhardt_hierarchy_curvature(r_samples)
+           curv = compute_krackhardt_hierarchy_curvature(r_samples, entity_dict)
            print(v, ': ', curv)
     else:
-        print(compute_krackhardt_hierarchy_curvature(samples))
+        print(compute_krackhardt_hierarchy_curvature(samples, entity_dict))
+
 
 def sample(G, n_samples):
 
@@ -61,15 +62,25 @@ def sample(G, n_samples):
     nodes.sort()
     n = H.shape[0]
     curvature = []
+    max_iter = 10000
+    iter = 0
     idx = 0
 
     while idx < n_samples:
+
+        # if in max_iter we cannot sample a triangle check the diameter of the 
+        # component, must be at least 3 to sample triangles
+        if iter == max_iter:
+            d = nx.algorithms.distance_measures.diameter(G)
+            if d < 3: return None
+
+        iter = iter + 1
+
         b = random.randint(0, n-1)
         c = random.randint(0, n-1)
         if b == c: continue
         
         path = nx.shortest_path(G, source=nodes[b], target=nodes[c])
-        #print(b, c, len(path))
         if len(path) < 3: continue
 
         middle = len(path) // 2
@@ -94,7 +105,6 @@ def sample(G, n_samples):
     
     return curvature
 
-
 def compute_curvature(samples, entity_dict):
     sub_graph = create_graph(samples, entity_dict, type='undirected')
     components = [sub_graph.subgraph(c) for c in nx.connected_components(sub_graph)]
@@ -108,7 +118,8 @@ def compute_curvature(samples, entity_dict):
         n_samples = int(1000 * weight)
         if n_samples > 0 and c.number_of_nodes() > 3:
             curv = sample(c, n_samples)
-            curvs.extend(curv)
+            if curv is not None:
+                curvs.extend(curv)
     
     return np.mean(curvs), total
 
@@ -131,7 +142,11 @@ def compute_curvature_estimate(samples, relations_dict, entity_dict, relation):
         curv, _ = compute_curvature(samples, entity_dict)
         print(curv)
 
+
+
+
 if __name__ == "__main__":
+    
     args = parser.parse_args()
     dataset_path = "{}/data/{}_{}".format(kge_path, args.dataset, args.kg_type)
 
@@ -145,6 +160,7 @@ if __name__ == "__main__":
         entity_dict = {v: int(k) for line in f for (k, v) in [line.strip().split(None, 1)]}
 
     
-    #compute_krackhardt_hierarchy_score(triplets, relations_dict, args.relation)
-
-    compute_curvature_estimate(triplets, relations_dict, entity_dict, args.relation)
+    if args.curvature_type == 'krackhardt':
+        compute_krackhardt_hierarchy_score(triplets, relations_dict, entity_dict, args.relation)
+    else:
+        compute_curvature_estimate(triplets, relations_dict, entity_dict, args.relation)

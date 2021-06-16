@@ -44,10 +44,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--compute_embed", type=bool, default=True, help = "Compute embeddings for KG using LibKGE"
-)
-
-parser.add_argument(
     "--model", default="ComplEx", choices=all_models, help="Embedding model"
 )
 
@@ -155,6 +151,10 @@ parser.add_argument(
     '--qa_nn_type', default='LSTM', choices=['LSTM', 'RoBERTa']
 )
 
+parser.add_argument(
+    '--use_relation_matching', type=str, help = "Use relation matching suring QA task"
+)
+
 
 
 # Exporting enviromental variables
@@ -205,6 +205,11 @@ def train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_sampl
                 elif no_update == args.patience or epoch == args.max_epochs-1:
                     print("Model has exceed patience or reached maximum epochs")
                     exit()
+
+
+
+def relation_matching_model():
+    pass
 
 
 if __name__ == "__main__":
@@ -260,7 +265,7 @@ if __name__ == "__main__":
     print('Process QA dataset')
     word2idx,idx2word, max_len = get_vocab(train_samples)
     vocab_size = len(word2idx)
-    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(data=train_samples, word2idx=word2idx, relations=r, entities=e, entity2idx=entity2idx)
+    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(data=train_samples, word2idx=word2idx, relations=r, entities=e, entity2idx=entity2idx, idx2entity=idx2entity)
     data_loader = getattr(dataloaders, 'DataLoader_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=15)
 
 
