@@ -31,8 +31,12 @@ usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
               [--learning_rate_kge LEARNING_RATE]
               [--learning_rate_kgqa LEARNING_RATE]
               [--freeze FREEZE] [--use_cuda USE_CUDA]
-              [--qa_nn_type {LSTM,RoBERTa}]
-
+              [--num_workers NUM_WORKERS] [--do_batch_norm BATCH_NORM]
+              [--qa_nn_type {LSTM,RoBERTa}] ---gpu GPU]
+              [--use_relation_matching USE_RELATION_MATCHING]
+              [--init_size INIT_SIZE] [--embeddings KG_EMBEDDINGS_PATH]
+              [--labels_smoothing LABELS_SMOOTHING]
+ 
 Knowledge Graph QA
 
 optional arguments:
@@ -69,7 +73,7 @@ optional arguments:
   --init_size           Initial embeddings' scale for hyperbolic embeddings
   --embeddings          Path to the folder with computed embeddings for KG
   --qa_nn_type {LSTM,RoBERTa}
-                        Whcih NN to use for question ebmeddings
+                        Which NN to use for question ebmeddings
   --use_relation_matching 
                         Use relation matching for postprocessing candidates in QA task
 ```
