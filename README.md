@@ -19,7 +19,7 @@ source set_env.sh
 To train and evaluate a QA task over KG, use the main.py script:
 
 ```sh
-usage: main.py [-h] [--dataset {MetaQA,fbwq}]
+usage: main.py [-h] [--dataset DATASET]
               [--model {TransE,RESCAL,CP,Distmult,SimplE,RotH,RefH,AttH,ComplEx,RotatE}]
               [--regularizer {N3,N2}] [--reg REG]
               [--optimizer {Adagrad,Adam}]
@@ -34,38 +34,33 @@ Knowledge Graph Embedding
 
 optional arguments:
   -h, --help            show this help message and exit
-  --dataset {FB15K,WN,WN18RR,FB237,YAGO3-10}
-                        Knowledge Graph dataset
-  --model {TransE,CP,MurE,RotE,RefE,AttE,RotH,RefH,AttH,ComplEx,RotatE}
-                        Knowledge Graph embedding model
-  --regularizer {N3,N2}
+  --dataset             Knowledge Graph dataset
+  --kg_type             Type of graph (full, sparse)
+  --model {TransE,RESCAL,CP,Distmult,SimplE,RotH,RefH,AttH,ComplEx,RotatE}
+                        Knowledge Graph embedding model and QA score function
+  --regularizer {L3}
                         Regularizer
-  --reg REG             Regularization weight
-  --optimizer {Adagrad,Adam,SparseAdam}
+  --reg                 Regularization weight
+  --optimizer {Adagrad,Adam}
                         Optimizer
-  --max_epochs MAX_EPOCHS
-                        Maximum number of epochs to train for
-  --patience PATIENCE   Number of epochs before early stopping
-  --valid VALID         Number of epochs before validation
-  --rank RANK           Embedding dimension
-  --batch_size BATCH_SIZE
-                        Batch size
-  --neg_sample_size NEG_SAMPLE_SIZE
-                        Negative sample size, -1 to not use negative sampling
-  --dropout DROPOUT     Dropout rate
-  --init_size INIT_SIZE
-                        Initial embeddings' scale
-  --learning_rate LEARNING_RATE
-                        Learning rate
-  --gamma GAMMA         Margin for distance-based losses
-  --bias {constant,learn,none}
-                        Bias type (none for no bias)
-  --dtype {single,double}
-                        Machine precision
-  --double_neg          Whether to negative sample both head and tail entities
-  --debug               Only use 1000 examples for debugging
-  --multi_c             Multiple curvatures per relation
-  ```
+  --max_epochs
+                        Maximum number of epochs
+  --patience            Number of epochs before early stopping for KG embeddings
+  --valid_every         Number of epochs before validation for QA task
+  --dim                 Embedding dimension
+  --batch_size          Batch size for QA task
+  --kg_batch_size       Batch size for computing KG embeddings 
+  --learning_rate_kgqa  Learning rate for QA task
+  --learning_rate_kge   Learning rate for computing KG embeddings
+  --hops                Number of edges to reson over to reach the answer
+  --ent_dropout         Entity Dropout rate used in QA score function 
+  --rel_dropout         Relation Dropout rate used in QA score function
+  --score_dropout       Score Dropout rate used in QA score function
+  --nn_dropout          Dropout rate for fully connected layers with RoBERTa 
+  --freeze              Freeze weights of trained KG embeddings
+  --use_cuda            Use gpu
+```
+
 ### Experiments
 
 ### Computing graph curvature
