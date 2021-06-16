@@ -19,16 +19,18 @@ source set_env.sh
 To train and evaluate a QA task over KG, use the main.py script:
 
 ```sh
-usage: main.py [-h] [--dataset DATASET]
+usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
               [--model {TransE,RESCAL,CP,Distmult,SimplE,RotH,RefH,AttH,ComplEx,RotatE}]
-              [--regularizer {N3,N2}] [--reg REG]
-              [--optimizer {Adagrad,Adam}]
+              [--hops HOPS] [--regularizer {L3}] 
+              [--reg REG] [--optimizer {Adagrad,Adam}]
               [--max_epochs MAX_EPOCHS] [--valid_every VALID]
-              [--dim RANK] [--batch_size BATCH_SIZE]
-              [--neg_sample_size NEG_SAMPLE_SIZE] [--dropout DROPOUT]
-              [--init_size INIT_SIZE] [--learning_rate LEARNING_RATE]
-              [--gamma GAMMA] [--bias {constant,learn,none}]
-              [--dtype {single,double}] [--double_neg] [--debug] [--multi_c]
+              [--dim RANK] [--patience PATIENCE]
+              [--batch_size BATCH_SIZE] [--kg_batch_size KG_BATCH_SIZE]
+              [--ent_dropout DROPOUT] [--rel_dropout DROPOUT]
+              [--score_dropout DROPOUT] [--nn_dropout DROPOUT]
+              [--learning_rate_kge LEARNING_RATE]
+              [--learning_rate_kgqa LEARNING_RATE]
+              [--freeze FREEZE] [--use_cuda USE_CUDA]
 
 Knowledge Graph Embedding
 
