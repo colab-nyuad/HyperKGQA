@@ -27,9 +27,9 @@ This implementation includes the following models:
 
 ### Datasets
 The repo presents results for two QA datasets MetaQA and WebQuestionsSP. Sparse MetaQA KG contains only 50% of the triples (randomly selected without replacement). 
-For WebQuestionsSP the underlying KG was careted by selecting a subset of Freebase, which contains all facts that are within 2-hops of any entity mentioned in the questions pruned to contain only those relations that are in the QA dataset. For the sparse version 50% of the edges were sampled.
+For WebQuestionsSP the underlying KG was created by selecting a subset of Freebase, which contains all facts that are within 2-hops of any entity mentioned in the questions pruned to contain only those relations that are in the QA dataset. For the sparse version 50% of the edges were sampled.
 
-Please refer to the baseline paper for details on how sparse KGs were created [Improving Multi-hop Question Answering over Knowledge Graphs using
+Please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using
 Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/).
  
 Please download the zip file with KG and QA datasets [here](https://drive.google.com/file/d/1VKjZ3HxwxEpYLwqG3iD5VAJmMdyrRbZB/view?usp=sharing). Unzip KGs datasets into kge/data and QA_data into the folder data.
