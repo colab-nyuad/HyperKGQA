@@ -31,6 +31,7 @@ usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
               [--learning_rate_kge LEARNING_RATE]
               [--learning_rate_kgqa LEARNING_RATE]
               [--freeze FREEZE] [--use_cuda USE_CUDA]
+              [--qa_nn_type {LSTM,RoBERTa}]
 
 Knowledge Graph QA
 
@@ -61,6 +62,16 @@ optional arguments:
   --nn_dropout          Dropout rate for fully connected layers with RoBERTa 
   --freeze              Freeze weights of trained KG embeddings
   --use_cuda            Use gpu
+  --gpu                 How many gpus to use
+  --num_workers         Number of workers for parallel computing 
+  --do_batch_norm       Do batch normalization for ComplEx and RotatE
+  --labels_smoothing    Labels smoothing
+  --init_size           Initial embeddings' scale for hyperbolic embeddings
+  --embeddings          Path to the folder with computed embeddings for KG
+  --qa_nn_type {LSTM,RoBERTa}
+                        Whcih NN to use for question ebmeddings
+  --use_relation_matching 
+                        Use relation matching for postprocessing candidates in QA task
 ```
 
 ### Experiments
