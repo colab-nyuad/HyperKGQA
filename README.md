@@ -114,7 +114,7 @@ for Freebase:
 ```
 python main.py --embeddings data/pretrained_models/embeddings/fbwq/ComplEx_fbwq_full_50/ --model ComplEx --dim 50 \ 
 --kg_type full --valid_every 10 --max_epochs 200 --learning_rate_kgqa 0.00002 --freeze True --do_batch_norm True \
---batch_size 16 --labels_smoothing 0.05
+--batch_size 16 --labels_smoothing 0.05 --qa_nn_type RoBERTa
 ```
   
 ### Experiments
