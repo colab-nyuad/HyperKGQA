@@ -26,33 +26,13 @@ This implementation includes the following models:
 - AttH [8]
 
 ### Datasets
-KG dataset
-There are 2 datasets: MetaQA_full and MetaQA_half. Full dataset contains the original kb.txt as train.txt with duplicate triples removed. Half contains only 50% of the triples (randomly selected without replacement). Please refer to the baseline paper for details on how sparse MetaQA dataset and 
+The repo presents results for two QA datasets MetaQA and WebQuestionsSP. Sparse MetaQA KG contains only 50% of the triples (randomly selected without replacement). 
+For WebQuestionsSP the underlying KG was careted by selecting a subset of Freebase, which contains all facts that are within 2-hops of any entity mentioned in the questions pruned to contain only those relations that are in the QA dataset. For the sparse version 50% of the edges were sampled.
 
-There are some lines like 'entity NOOP entity' in the train.txt for half dataset. This is because when removing the triples, all triples for that entity were removed, hence any KG embedding implementation would not find any embedding vector for them using the train.txt file. By including such 'NOOP' triples we are not including any additional information regarding them from the KG, it is there just so that we can directly use any embedding implementation to generate some random vector for them.
-
-QA Dataset
-There are 5 files for each dataset (1, 2 and 3 hop)
-
-qa_train_{n}hop_train.txt
-qa_train_{n}hop_train_half.txt
-qa_train_{n}hop_train_old.txt
-qa_dev_{n}hop.txt
-qa_test_{n}hop.txt
-Out of these, qa_dev, qa_test and qa_train_{n}hop_old are exactly the same as the MetaQA original dev, test and train files respectively.
-
-For qa_train_{n}hop_train and qa_train_{n}hop_train_half, we have added triple (h, r, t) in the form of (head entity, question, answer). This is to prevent the model from 'forgetting' the entity embeddings when it is training the QA model using the QA dataset. qa_train.txt contains all triples, while qa_train_half.txt contains only triples from MetaQA_half.
-
-WebQuestionsSP
-KG dataset
-There are 2 datasets: fbwq_full and fbwq_half
-
-Creating fbwq_full: We restrict the KB to be a subset of Freebase which contains all facts that are within 2-hops of any entity mentioned in the questions of WebQuestionsSP. We further prune it to contain only those relations that are mentioned in the dataset. This smaller KB has 1.8 million entities and 5.7 million triples.
-
-Creating fbwq_half: We randomly sample 50% of the edges from fbwq_full.
-
-QA Dataset
-Same as the original WebQuestionsSP QA dataset.
+Please refer to the baseline paper for details on how sparse KGs were created [Improving Multi-hop Question Answering over Knowledge Graphs using
+Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/).
+ 
+Please download the zip file with KG and QA datasets [here](https://drive.google.com/file/d/1VKjZ3HxwxEpYLwqG3iD5VAJmMdyrRbZB/view?usp=sharing). Unzip KGs datasets into kge/data and QA_data into the folder data.
 
 ### Usage
 To train and evaluate a QA task over KG, use the main.py script:
