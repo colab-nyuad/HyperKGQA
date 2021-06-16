@@ -69,16 +69,19 @@ optional arguments:
 ### Experiments
 
 ### Computing graph curvature
-Two metrics are available to estimate how hierarchical relations in a knowledge graph are.  is: the curvature estimate ξG and the Krackhardt hierarchy score KhsG. While the curvature estimate captures global hierarchical behaviours (how much the graph is tree-like when zoomingout) and the Krackhardt score captures a more local
-behaviour (how many small loops the graph has). For details on computing metrics please refer to . To compute the metrics, use the graph_curvature.py script.
+Two metrics are available to estimate how hierarchical relations in a KG are: the curvature estimate and the Krackhardt hierarchy score. The curvature estimate captures global hierarchical behaviours (how much the graph is tree-like) and the Krackhardt score reflects more local behaviour (how many small loops the graph has). For details on computing metrics please refer to [Low-Dimensional Hyperbolic Knowledge Graph Embeddings](https://arxiv.org/abs/2005.00545) and [Learning mixed-curvature representations in product spaces](https://openreview.net/pdf?id=HJxeWnCcF7). To compute the metrics, use the graph_curvature.py script with the following arguments:
 ```sh
-usage: graph_curvature.py [-h] [--dataset DATASET] [--kg_type KG_TYPE] [--curvature_type CURVATURE_TYPE] [--relation RELATION]
+usage: graph_curvature.py [-h] [--dataset DATASET] 
+                          [--kg_type KG_TYPE] 
+                          [--curvature_type {'krackhardt', 'global_curvature'}] 
+                          [--relation RELATION]
 ```
+
 Following is an example command to compute the Krackhardt hierarchy score for all relations in a KG: 
 ```
 python graph_curvature.py --dataset MetaQA --kg_type half --curvature_type krackhardt
 ```
-For a specific relation:
+or for a specific relation:
 ```
 python graph_curvature.py --dataset MetaQA --kg_type half --curvature_type krackhardt --relation _instance_hypernym
 ```
