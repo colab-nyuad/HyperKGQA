@@ -75,6 +75,14 @@ usage: graph_curvature.py [-h] [--dataset DATASET]
                           [--kg_type KG_TYPE] 
                           [--curvature_type {'krackhardt', 'global_curvature'}] 
                           [--relation RELATION]
+
+Knowledge Graph Curvature
+arguments:
+  -h, --help            show this help message and exit
+  --dataset             Knowledge Graph dataset
+  --kg_type             Knowledge Graph type ('full' for full,'half' for sparse)
+  --curvature_type      Curvature metric to compute ('krackhardt' for Krackhardt hierarchy score, 'global_curvature' for curvature estimate)
+  --relation            Specific relation
 ```
 If computing graph curvature is done before link prediction or separatly, plese make sure that the name of the dataset is according to the format <dataset>_<kg_type> and is placed inside the folder kge/data. To preprocess the dataset run the following command inside the folder data:
 ```
