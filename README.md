@@ -87,7 +87,8 @@ python main.py --model AttH --dim 400 --kg_type half --valid_every 5 --max_epoch
 To use already pretrained embeddings, please specifiy the path to the folder with files checkpoint_best.pt, entity_ids.del and relation_ids.del. Following is an example of such command: 
 
 ```
-python main.py --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ --model AttH \ --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
+python main.py --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ --model AttH --dim 400 \
+--kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
 ```
 
   
