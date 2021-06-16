@@ -105,7 +105,7 @@ arguments:
   --curvature_type      Curvature metric to compute ('krackhardt' for Krackhardt hierarchy score, 'global_curvature' for curvature estimate)
   --relation            Specific relation
 ```
-If computing graph curvature is done before link prediction or separatly, plese make sure that the name of the dataset is according to the format <dataset>\_<kg_type> and is placed inside the folder kge/data. To preprocess the dataset run the following command inside the folder data:
+If computing graph curvature is done before link prediction or separatly, plese make sure that the name of the dataset is according to the format \<dataset\>\_\<kg_type\> and is placed inside the folder kge/data. To preprocess the dataset run the following command inside the folder data:
 ```
 python preprocess/preprocess_default.py <dataset>_<kg_type>
 ```
