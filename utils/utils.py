@@ -144,8 +144,10 @@ def generate_yaml(args, yaml_file):
     default_config['valid']['every'] = args.valid_every
     default_config['valid']['early_stopping'] = {'patience': args.patience}
     default_config['eval'] = {'batch_size': args.batch_size}
-    default_config['model'] = args.model.lower()
-    default_config['lookup_embedder'] = {'dim':args.dim,  'dropout':args.dropout}
+    default_config['model'] = 'reciprocal_relations_model'
+    default_config['reciprocal_relations_model'] = {}
+    default_config['reciprocal_relations_model']['base_model'] = {'type' : args.model.lower()}
+    default_config['lookup_embedder'] = {'dim':args.dim}
     with open(yaml_file, 'w') as (outfile):
         yaml.dump(default_config, outfile, default_flow_style=False)
 

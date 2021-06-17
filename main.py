@@ -112,10 +112,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--decay', type=float, default=1.0
-)
-
-parser.add_argument(
     "--freeze", default=False, type=bool, help="Freeze weights of trained embeddings"
 )
 
@@ -144,6 +140,10 @@ parser.add_argument(
 )
 
 parser.add_argument(
+    '--decay', type=float, default=1.0
+)
+
+parser.add_argument(
     '--embeddings', type=str, help = "Path to the folder with computed embeddings for KG"
 )
 
@@ -156,20 +156,18 @@ parser.add_argument(
 )
 
 
-
 # Exporting enviromental variables
 
 qa_data_path = os.environ['DATA_PATH']
 checkpoints = os.environ['CHECKPOINTS']
 kge_path = os.environ['KGE_PATH']
 config_files = os.environ['CONFIG_FILES']
-os.environ["CUDA_VISIBLE_DEVICES"]="1,2,3"
+os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
 
 #-------------------------------------
 
 
-def train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_samples, test_samples, args, embedding_path):
-    
+def train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_samples, test_samples, args):
     best_score = -float("inf")
     no_update = 0
     eps = 0.0001
@@ -188,7 +186,7 @@ def train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_sampl
 
             elif phase=='valid':
                 qa_model.eval()
-                answers, score = qa_optimizer.calculate_valid_loss(valid_samples, embedding_path = embedding_path)
+                answers, score = qa_optimizer.calculate_valid_loss(valid_samples)
 
                 if score > best_score + eps:
                     best_score = score
@@ -206,8 +204,6 @@ def train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_sampl
                     print("Model has exceed patience or reached maximum epochs")
                     exit()
 
-
-
 def relation_matching_model():
     pass
 
@@ -215,15 +211,15 @@ def relation_matching_model():
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    dataset_path = "{}/data/{}_{}".format(kge_path, args.dataset, args.kg_type)
+    kge_data_path = "{}/data".format(kge_path)
+    dataset_path = "{}/{}_{}".format(kge_data_path, args.dataset, args.kg_type)
 
     ## Compute embeddings for KG
-
     if args.embeddings:
         embedding_path = args.embeddings
     else:
         # Process dataset according to LibKGE format
-        cmd = "python {}/data/preprocess/preprocess_default.py {}".format(kge_path, dataset_path)
+        cmd = "python {}/preprocess/preprocess_default.py {}".format(kge_data_path, dataset_path)
         os.system(cmd)
 
         yaml_file = '{}/config.yaml'.format(dataset_path)
@@ -241,15 +237,17 @@ if __name__ == "__main__":
         cmd = "kge resume {}".format(dataset_path)
         os.system(cmd)
 
+        # copy teh best checkpoint and remove files created by LibKGE
         embedding_path = copy_embeddings(dataset_path, args, qa_data_path)
-
+        cmd = "{}/clean.sh {}".format(kge_data_path, dataset_path)
+        print(cmd)
+        os.system(cmd)
 
     ## Reading QA dataset
     train_data, valid_data, test_data, check_length = read_qa_dataset(args.dataset, args.hops, qa_data_path, args.kg_type)
     train_samples = process_text_file(train_data, check_length)
     valid_samples = process_text_file(valid_data, check_length)
     test_samples = process_text_file(test_data, check_length)
-
 
     ## Loading trained KG embeddings 
     print('Loading kg embeddings from', embedding_path)
@@ -268,7 +266,6 @@ if __name__ == "__main__":
     dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(data=train_samples, word2idx=word2idx, relations=r, entities=e, entity2idx=entity2idx, idx2entity=idx2entity)
     data_loader = getattr(dataloaders, 'DataLoader_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=15)
 
-
     ## Create QA model
     print('Creating QA model')
     device = torch.device(args.gpu if args.use_cuda else "cpu")
@@ -283,8 +280,7 @@ if __name__ == "__main__":
     scheduler = ExponentialLR(optimizer, args.decay)
     qa_optimizer = QAOptimizer(args, qa_model, optimizer, regularizer, dataset, device)
 
-
-    train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_samples, test_samples, args, embedding_path)
+    train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_samples, test_samples, args)
 
     
     

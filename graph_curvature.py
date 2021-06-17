@@ -44,7 +44,6 @@ def compute_krackhardt_hierarchy_curvature(samples, entity_dict):
     return curv
 
 def compute_krackhardt_hierarchy_score(samples, relations_dict, entity_dict, relation):
-
     if relation is 'all':
        for k,v in relations_dict.items():
            mask = samples[:, 1] == k
@@ -56,7 +55,6 @@ def compute_krackhardt_hierarchy_score(samples, relations_dict, entity_dict, rel
 
 
 def sample(G, n_samples):
-
     H = nx.to_scipy_sparse_matrix(G)
     nodes = list(G)
     nodes.sort()
@@ -124,7 +122,6 @@ def compute_curvature(samples, entity_dict):
     return np.mean(curvs), total
 
 def compute_curvature_estimate(samples, relations_dict, entity_dict, relation):
-
     if relation is 'all':
        curvs = []
        for k,v in relations_dict.items():
@@ -141,8 +138,6 @@ def compute_curvature_estimate(samples, relations_dict, entity_dict, relation):
     else:
         curv, _ = compute_curvature(samples, entity_dict)
         print(curv)
-
-
 
 
 if __name__ == "__main__":
