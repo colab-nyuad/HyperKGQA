@@ -27,12 +27,6 @@ class BaseH(KGModel):
 
         return - hyp_distance_multi_c(lhs_e, rhs_e, c, eval_mode) ** 2
 
-    def get_embeddings(self, head, question):
-        head_e = self.get_query(head)
-        head_e = self.ent_dropout(head_e)
-        rel_e = self.rel_dropout(question)
-        return head_e, rel_e
-
 class RotH(BaseH):
     """Hyperbolic 2x2 Givens rotations"""
 

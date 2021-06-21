@@ -239,9 +239,8 @@ if __name__ == "__main__":
 
         # copy teh best checkpoint and remove files created by LibKGE
         embedding_path = copy_embeddings(dataset_path, args, qa_data_path)
-        cmd = "{}/clean.sh {}".format(kge_data_path, dataset_path)
-        print(cmd)
-        os.system(cmd)
+#        cmd = "{}/clean.sh {}".format(kge_data_path, dataset_path)
+#        os.system(cmd)
 
     ## Reading QA dataset
     train_data, valid_data, test_data, check_length = read_qa_dataset(args.dataset, args.hops, qa_data_path, args.kg_type)

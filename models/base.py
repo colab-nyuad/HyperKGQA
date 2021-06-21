@@ -43,6 +43,12 @@ class KGModel(nn.Module, ABC):
 
         return head_e
 
+    def get_embeddings(self, head, question):
+        head_e = self.get_query(head)
+        head_e = self.ent_dropout(head_e)
+        rel_e = self.rel_dropout(question)
+        return head_e, rel_e
+
     @abstractmethod
     def get_queries(self, head, question):
         """Compute embedding and biases of queries.
