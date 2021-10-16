@@ -10,16 +10,11 @@ from collections import defaultdict
 from tqdm import tqdm
 import numpy as np
 
-
 class Dataset_LSTM(Dataset):
-    def __init__(self, data, word2idx, relations, entities, entity2idx):
+    def __init__(self, data, word2idx, entity2idx):
         self.data = data
-        self.relations = relations
-        self.entities = entities
         self.entity2idx = entity2idx
         self.word2idx = word2idx
-        self.kg_size = (len(entities), len(relations), len(entities))
-
 
     def get_shape(self):
         return self.kg_size
@@ -46,7 +41,7 @@ class Dataset_LSTM(Dataset):
             tail_name = tail_name.strip()
             tail_ids.append(self.entity2idx[tail_name])
         tail_onehot = self.toOneHot(tail_ids)
-        return question_ids, head_id, tail_onehot 
+        return question_ids, head_id, tail_onehot
 
     def data_generator(self, data):
         for i in range(len(data)):
@@ -63,29 +58,29 @@ class Dataset_LSTM(Dataset):
 
 
 def _collate_fn(batch):
-    sorted_seq = sorted(batch, key=lambda sample: len(sample[0]), reverse=True)
-    sorted_seq_lengths = [len(i[0]) for i in sorted_seq]
-    longest_sample = sorted_seq_lengths[0]
-    minibatch_size = len(batch)
-    input_lengths = []
-    p_head = []
-    p_tail = []
-    inputs = torch.zeros(minibatch_size, longest_sample, dtype=torch.long)
-    for x in range(minibatch_size):
-        sample = sorted_seq[x][0]
-        p_head.append(sorted_seq[x][1])
-        tail_onehot = sorted_seq[x][2]
-        p_tail.append(tail_onehot)
-        seq_len = len(sample)
-        input_lengths.append(seq_len)
-        sample = torch.tensor(sample, dtype=torch.long)
-        sample = sample.view(sample.shape[0])
-        inputs[x].narrow(0,0,seq_len).copy_(sample)
+        sorted_seq = sorted(batch, key=lambda sample: len(sample[0]), reverse=True)
+        sorted_seq_lengths = [len(i[0]) for i in sorted_seq]
+        longest_sample = sorted_seq_lengths[0]
+        minibatch_size = len(batch)
+        input_lengths = []
+        p_head = []
+        p_tail = []
+        inputs = torch.zeros(minibatch_size, longest_sample, dtype=torch.long)
 
-    return inputs, torch.tensor(input_lengths, dtype=torch.long), torch.tensor(p_head, dtype=torch.long), torch.stack(p_tail)
+        for x in range(minibatch_size):
+            sample = sorted_seq[x][0]
+            p_head.append(sorted_seq[x][1])
+            tail_onehot = sorted_seq[x][2]
+            p_tail.append(tail_onehot)
+            seq_len = len(sample)
+            input_lengths.append(seq_len)
+            sample = torch.tensor(sample, dtype=torch.long)
+            sample = sample.view(sample.shape[0])
+            inputs[x].narrow(0,0,seq_len).copy_(sample)
+
+        return inputs, torch.tensor(input_lengths, dtype=torch.long), torch.tensor(p_head, dtype=torch.long), torch.stack(p_tail)
 
 class DataLoader_LSTM(DataLoader):
     def __init__(self, *args, **kwargs):
         super(DataLoader_LSTM, self).__init__(*args, **kwargs)
         self.collate_fn = _collate_fn
-

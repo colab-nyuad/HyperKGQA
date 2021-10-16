@@ -1,7 +1,5 @@
 dataset:
-  name: fbwq_half
-  num_entities: 1880592
-  num_relations: 534
+  name: fbwq_full
 
 import:
 - rescal
@@ -64,7 +62,7 @@ rescal:
       p: -1.0
     regularize_weight: 9.477246920677314e-09
   relation_embedder:
-    dim: 400
+    dim: 160000
     dropout: 0.014135406641829107
     normalize:
       p: -1.0

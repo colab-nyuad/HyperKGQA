@@ -21,17 +21,10 @@ class BaseC(KGModel):
         self.bn0 = nn.BatchNorm1d(self.multiplier)
         self.bn2 = nn.BatchNorm1d(self.multiplier)
 
-    def similarity_score(self, lhs_e, rhs_e, eval_mode):
+    def similarity_score(self, lhs_e, rhs_e):
         """Compute similarity scores or queries against targets in embedding space."""
         rhs_e = rhs_e[:, :self.rank], rhs_e[:, self.rank:]
-
-        if eval_mode:
-            return lhs_e[0] @ rhs_e[0].transpose(0, 1) + lhs_e[1] @ rhs_e[1].transpose(0, 1)
-        else:
-            return torch.sum(
-                lhs_e[0] * rhs_e[0] + lhs_e[1] * rhs_e[1],
-                1, keepdim=True
-            )
+        return lhs_e[0] @ rhs_e[0].transpose(0, 1) + lhs_e[1] @ rhs_e[1].transpose(0, 1)
 
     def get_embeddings(self, head, question):
         head_e = self.get_query(head)

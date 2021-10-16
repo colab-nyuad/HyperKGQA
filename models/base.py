@@ -62,7 +62,7 @@ class KGModel(nn.Module, ABC):
         pass
 
     @abstractmethod
-    def similarity_score(self, lhs_e, rhs_e, eval_mode):
+    def similarity_score(self, lhs_e, rhs_e):
         """Compute similarity scores or queries against targets in embedding space.
 
         Args:

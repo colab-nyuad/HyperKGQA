@@ -3,6 +3,9 @@ from shutil import copyfile
 import networkx as nx
 import numpy as np
 from tqdm import tqdm
+import pickle
+from numpy import linalg as LA
+import re
 
 def str2bool(v):
     return int(v)
@@ -18,9 +21,8 @@ def prepare_embeddings(embedding_dict):
         idx2entity[i] = key
         i += 1
         embedding_matrix.append(entity)
-    else:
-        return (
-         entity2idx, idx2entity, embedding_matrix)
+    
+    return (entity2idx, idx2entity, embedding_matrix)
 
 
 def get_embeddings(embedder, dict_):
@@ -40,8 +42,12 @@ def preprocess_entities_relations(kge_model, embedding_path):
     entity_dict = '{}/entity_ids.del'.format(embedding_path)
     embedder = kge_model._entity_embedder
     e = get_embeddings(embedder, entity_dict)
+
     relation_dict = '{}/relation_ids.del'.format(embedding_path)
     embedder = kge_model._relation_embedder
+    if hasattr(embedder, 'base_embedder'):
+        embedder = embedder.base_embedder
+    print(embedder._embeddings)
     r = get_embeddings(embedder, relation_dict)
     return (e, r)
 
@@ -63,37 +69,27 @@ def get_vocab(data):
     return (word_to_ix, idx2word, maxLength)
 
 
-def process_text_file(text_file, check_length, split=False):
+def process_text_file(text_file):
     data_array = []
+    heads = []
     with open(text_file, 'r') as data_file:
         for data_line in data_file.readlines():
             data_line = data_line.strip()
-            if data_line == '':
-                continue
+            if data_line == '': continue
             data_line = data_line.strip().split('\t')
-            if check_length and len(data_line) != 2:
+            
+            # to ignore questions with missing answers
+            if len(data_line) != 2: 
+                print(data_line)
                 continue
-
-            question = data_line[0].split('[')
-            question_1 = question[0]
-            question_2 = question[1].split(']')
-            head = question_2[0].strip()
-            question_2 = question_2[1]
-            question = question_1 + 'NE' + question_2
+                        
+            question = re.sub('\[.+\]', 'NE', data_line[0])
+            head = data_line[0].split('[')[1].split(']')[0]
             ans = data_line[1].split('|')
             data_array.append([head, question.strip(), ans])
-    
-        if split == False:
-            return data_array
-        data = []
-        for line in data_array:
-            head = line[0]
-            question = line[1]
-            tails = line[2]
-            for tail in tails:
-                data.append([head, question, tail])
+            heads.append(head)
                 
-        return data
+        return data_array, set(heads)
 
 
 def writeToFile(lines, fname):
@@ -105,31 +101,13 @@ def writeToFile(lines, fname):
         print('Wrote to ', fname)
 
 
-def get_MetaQA_dataset(hops, qa_data_path, kg_type):
-    hops = hops + 'hop'
-    metaqa_data_path = '{}/QA_data/MetaQA'.format(qa_data_path)
-    train_dp = '{}/qa_train_{}'.format(metaqa_data_path, hops)
-    train_dp = train_dp + '_half.txt' if kg_type == 'half' else train_dp + '.txt'
-    valid_dp = '{}/qa_dev_{}.txt'.format(metaqa_data_path, hops)
-    test_dp = '{}/qa_test_{}.txt'.format(metaqa_data_path, hops)
-    return (train_dp, valid_dp, test_dp, False)
-
-
-def get_fbwq_dataset(qa_data_path):
-    fbwq_data_path = '{}/QA_data/WebQuestionsSP'.format(qa_data_path)
-    train_dp = '{}/qa_train_webqsp.txt'.format(fbwq_data_path)
-    valid_dp = '{}/qa_test_webqsp.txt'.format(fbwq_data_path)
-    test_dp = valid_dp
-    return (train_dp, valid_dp, test_dp, True)
-
-
-def read_qa_dataset(dataset, hops, qa_data_path, kg_type):
-    if 'fbwq' in dataset:
-        return get_fbwq_dataset(qa_data_path)
-    if 'MetaQA' in dataset:
-        return get_MetaQA_dataset(hops, qa_data_path, kg_type)
-    print('Dataset is not supported, create a read function')
-
+def read_qa_dataset(hops, dataset_path):
+    if hops != 0:
+        dataset_path += '/{}hop'.format(hops)
+    train_data = '{}/train.txt'.format(dataset_path) 
+    test_data = '{}/test.txt'.format(dataset_path)
+    valid_data = '{}/valid.txt'.format(dataset_path)
+    return (train_data, valid_data, test_data)
 
 def generate_yaml(args, yaml_file):
     default_config = {}
@@ -153,7 +131,7 @@ def generate_yaml(args, yaml_file):
 
 
 def copy_embeddings(checkpoints_path, args, qa_data_path):
-    emb_path = '{}/pretrained_models/embeddings/{}'.format(qa_data_path, args.dataset)
+    emb_path = '{}/pretrained_models/{}'.format(qa_data_path, args.dataset)
     emb_dir = '{}/{}_{}_{}_{}'.format(emb_path, args.model, args.dataset, args.kg_type, args.dim)
     if not os.path.exists(emb_dir):
         os.makedirs(emb_dir)
@@ -163,33 +141,86 @@ def copy_embeddings(checkpoints_path, args, qa_data_path):
     else:
         return emb_dir
 
-def read_kg_triplets(dataset, relation, type):
+def read_kg_triplets(dataset, type):
     file = '{}/{}.txt'.format(dataset, type)
-
     triplets = []
     with open(file, 'r') as data_file:
         for data_line in data_file.readlines():
             data = data_line.strip().split('\t')
-            if relation == 'all' or (relation != 'all' and data[1] == relation):
-                triplets.append(data)
+            triplets.append(data)
         return np.array(triplets)
 
-def create_graph(samples, entity_dict, type='directed'):
-    if type is 'directed':
-        G = nx.DiGraph()
-    else:
-        G = nx.Graph()
+def create_graph(triplets, entity2idx, rel2idx, type='undirected'):
+    G = nx.MultiGraph() if type == 'undirected' else nx.MultiDiGraph()
+    return add_triplets_to_graph(G, triplets, entity2idx, rel2idx)
 
-    for t in tqdm(samples):
-        e1 = entity_dict[t[0].strip()]
-        e2 = entity_dict[t[2].strip()]
+def add_triplets_to_graph(G, triplets, entity2idx, rel2idx, strip=False):
+    for t in tqdm(triplets):
+        
+        if strip:
+            t[0] = t[0].strip()
+            t[2] = t[2].strip()
+        e1 = entity2idx[t[0]]
+        e2 = entity2idx[t[2]]
         G.add_node(e1)
         G.add_node(e2)
-        G.add_edge(e1, e2, name=t[1], weight=1)
+        G.add_edge(e1, e2, name=rel2idx[t[1]], weight=1)
     return G
 
 
-def get_relations_in_path(G, e1, e2):
-    path = nx.shortest_path(G, e1, e2)
-    print(path)
-    return set(relations)
+def get_relations_in_path(G, head, tail, hops):
+    try:
+        shortest_path = nx.shortest_path(G, head, tail)
+        if (hops == 0 and 2 <= len(shortest_path) <= 3) or (hops != 0 and len(shortest_path) == hops+1):
+            pathGraph = nx.path_graph(shortest_path)
+            relations = []
+            for ea in pathGraph.edges():
+                n_edges = G.number_of_edges(ea[0], ea[1])
+                relations.extend([G.edges[ea[0], ea[1], i]['name'] for i in range(n_edges)])
+            return relations
+        else: return []
+    except nx.exception.NetworkXNoPath:
+        return []
+
+def read_pruning_file(type, dataset_path, rel2idx, hops):
+    if hops != 0:
+        dataset_path += '/{}hop'.format(hops)
+    
+    with open('{}/pruning_{}.txt'.format(dataset_path, type), 'r') as f:
+        data = []
+        for line in f:
+            line = line.strip().split('\t')
+            question = re.sub('\[.+\]', '', line[0])
+            rel_list = line[1].split('|')
+            rel_id_list = [rel2idx[rel] for rel in rel_list if rel in rel2idx]
+            data.append([question, rel_id_list])
+        return data
+
+
+def read_dict(dict_):
+    with open(dict_) as f:
+        dictionary_ = {int(k): v for line in f for (k, v) in [line.strip().split(None, 1)]}
+    return dictionary_
+
+
+def read_inv_dict(dict_):
+    with open(dict_) as f:
+        dictionary_ = {v: int(k) for line in f for (k, v) in [line.strip().split(None, 1)]}
+    return dictionary_
+
+def group_questions_by_chain(dataset_path, hops):
+    if hops != 0: 
+        dataset_path += '/{}hop'.format(hops)
+    
+    rel_qq = {}
+    with open('{}/pruning_test.txt'.format(dataset_path), 'r') as f:
+        for line in f:
+            line = line.strip().split('\t')
+            question = re.sub('\[.+\]', 'NE', line[0])
+            if line[1] in rel_qq.keys():
+                rel_qq[line[1]].append(question)
+            else:
+                rel_qq[line[1]] = [question]
+
+        return rel_qq
+

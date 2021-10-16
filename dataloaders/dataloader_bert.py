@@ -13,17 +13,13 @@ from transformers import *
 
 
 class Dataset_RoBERTa(Dataset):
-    def __init__(self, data, word2idx, relations, entities, entity2idx):
+    def __init__(self, data, word2idx, entity2idx):
         self.data = data
-        self.entities = entities
-        self.relations = relations
         self.word2idx = word2idx
         self.entity2idx = entity2idx
         self.tokenizer_class = RobertaTokenizer
         self.pretrained_weights = 'roberta-base'
         self.tokenizer = self.tokenizer_class.from_pretrained(self.pretrained_weights, cache_dir='.')
-        self.kg_size = (len(entities), len(relations), len(entities))
-
 
     def get_shape(self):
         return self.kg_size
@@ -57,7 +53,8 @@ class Dataset_RoBERTa(Dataset):
             if tail_name in self.entity2idx:
                 tail_ids.append(self.entity2idx[tail_name])
         tail_onehot = self.toOneHot(tail_ids)
-        return question_tokenized, attention_mask, head_id, tail_onehot 
+
+        return question_tokenized, attention_mask, head_id, tail_onehot
 
     def tokenize_question(self, question):
         question = "<s> " + question + " </s>"
@@ -88,7 +85,7 @@ class Dataset_RoBERTa(Dataset):
                     if entity.strip() in self.entity2idx:
                         ans.append(self.entity2idx[entity.strip()])
 
-            yield torch.tensor(head, dtype=torch.long), question_tokenized, ans, attention_mask, data_sample[1]
+            yield torch.tensor(head, dtype=torch.long), question_tokenized, ans, attention_mask
 
 class DataLoader_RoBERTa(DataLoader):
     def __init__(self, *args, **kwargs):

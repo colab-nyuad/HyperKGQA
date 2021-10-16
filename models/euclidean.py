@@ -20,11 +20,13 @@ class BaseE(KGModel):
     def __init__(self, args, embedding_matrix):
         super(BaseE, self).__init__(args, embedding_matrix)
         self.half = False
+        self._norm = 2
 
-    def similarity_score(self, lhs_e, rhs_e, eval_mode):
+    def similarity_score(self, lhs_e, rhs_e):
         """Compute similarity scores or queries against targets in embedding space."""
-        score = - euc_sqdistance(lhs_e, rhs_e, eval_mode)
+        score = -torch.cdist(lhs_e, rhs_e, p=self._norm)
         return score
+    
 
 class TransE(BaseE):
     """Euclidean translations https://www.utc.fr/~bordesan/dokuwiki/_media/en/transe_nips13.pdf"""

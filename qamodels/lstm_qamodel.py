@@ -27,20 +27,19 @@ class LSTM_QAmodel(Base_QAmodel):
         self.GRU = nn.LSTM(self.rank, self.hidden_dim, self.n_layers, bidirectional=self.bidirectional, batch_first=True)
 
         self.hidden_dim = self.hidden_dim * 2
-
-        self.lin1 = nn.Linear(self.hidden_dim, self.mid1, bias=False)
-        self.lin2 = nn.Linear(self.mid1, self.mid2, bias=False)
-        xavier_normal_(self.lin1.weight.data)
-        xavier_normal_(self.lin2.weight.data)
+        self.lin1 = nn.Linear(self.hidden_dim, self.mid1)
+        self.lin2 = nn.Linear(self.mid1, self.mid2)
+        self.lin3 = nn.Linear(self.mid1, self.mid2)
+        self.lin4 = nn.Linear(self.mid1, self.mid2)
 
         if self.hyperbolic_layers:
-            self.hidden2c = nn.Linear(self.mid2, 1)
-            self.hidden2rel_diag = nn.Linear(self.mid2, self.relation_dim)
+            self.hidden2c = nn.Linear(self.hidden_dim, 1)
+            self.hidden2rel_diag = nn.Linear(self.hidden_dim, self.relation_dim)
             self.relation_dim = self.relation_dim * 2
 
             if self.context_layer:
-                self.hidden2context = nn.Linear(self.mid2, self.relation_dim // 2)
-                self.hidden2rel_diag = nn.Linear(self.mid2, self.relation_dim)
+                self.hidden2context = nn.Linear(self.hidden_dim, self.relation_dim // 2)
+                self.hidden2rel_diag = nn.Linear(self.hidden_dim, self.relation_dim)
 
         self.hidden2rel = nn.Linear(self.mid2, self.relation_dim)
 
@@ -49,14 +48,18 @@ class LSTM_QAmodel(Base_QAmodel):
         hidden = F.relu(hidden)
         hidden = self.lin2(hidden)
         hidden = F.relu(hidden)
+        hidden = self.lin3(hidden)
+        hidden = F.relu(hidden)
+        hidden = self.lin4(hidden)
+        hidden = F.relu(hidden)
         outputs = self.hidden2rel(hidden)
         
         if self.hyperbolic_layers:
-            c = F.softplus(self.hidden2c(hidden))
-            rel_diag = self.hidden2rel_diag(hidden)
+            c = F.softplus(self.hidden2c(input))
+            rel_diag = self.hidden2rel_diag(input)
 
             if self.context_layer:
-                context_vec = self.hidden2context(hidden)
+                context_vec = self.hidden2context(input)
                 return outputs, (c, rel_diag, context_vec)
             else:
                 return outputs, (c, rel_diag)
@@ -72,6 +75,7 @@ class LSTM_QAmodel(Base_QAmodel):
         return question_embedding
 
 
-    def get_predictions(self, question, head, tail, question_len):
+    def get_predictions(self, question, head, question_len):
         pred = super().get_score_ranked(head, question, question_len)
         return torch.sigmoid(pred)
+

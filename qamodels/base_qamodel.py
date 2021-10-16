@@ -10,6 +10,9 @@ from torch.nn.init import xavier_normal_
 from abc import ABC, abstractmethod
 from transformers import *
 import random
+import pickle
+from utils.utils import *
+from scipy.spatial import distance
 
 class Base_QAmodel(nn.Module):
 
@@ -27,14 +30,14 @@ class Base_QAmodel(nn.Module):
         self.emb_model_name = model.__class__.__name__
         self.hyperbolic_layers = False
         self.context_layer = False
+        self.hyperbolic_models = ['RefH', 'RotH', 'AttH']
 
         self.act = nn.Softmax(dim=1)
         self.scale = torch.Tensor([1. / np.sqrt(self.relation_dim)]).cuda()
-
         
-        if self.emb_model_name in ['RefH', 'RotH', 'AttH']:
+        if self.emb_model_name in self.hyperbolic_models:
             self.hyperbolic_layers = True
- 
+
         if self.emb_model_name == 'AttH':
             self.context_layer = True
 
@@ -54,7 +57,7 @@ class Base_QAmodel(nn.Module):
     def calculate_loss(self, question, head, tail, question_len):
         pass
 
-    def get_score_ranked(self, head, question, question_param, eval_mode=True):
+    def get_score_ranked(self, head, question, question_param):
 
         question_embedding = self.get_question_embedding(question, question_param)
         question_embedding, hyperbolic_layers = self.apply_nonLinear(question_embedding)
@@ -70,7 +73,7 @@ class Base_QAmodel(nn.Module):
             lhs_e = self.emb_model.get_queries(head, question_embedding)
 
         rhs_e = self.emb_model.get_rhs()
-        scores = self.emb_model.similarity_score(lhs_e, rhs_e, eval_mode=eval_mode)
+        scores = self.emb_model.similarity_score(lhs_e, rhs_e)
 
         return scores
 

@@ -13,6 +13,7 @@ import operator
 from torch.nn import functional as F
 from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
 import networkx as nx
+import ast
 
 from kge.model import KgeModel
 from kge.util.io import load_checkpoint
@@ -22,10 +23,11 @@ from kge.dataset import Dataset
 import dataloaders
 import optimizers
 import qamodels
+import pruning_models
 import models
 from utils.utils import *
 from models import all_models
-from optimizers import QAOptimizer
+from optimizers import QAOptimizer, PruningOptimizer
 
 parser = argparse.ArgumentParser(
     description="Graph Embedding for Question Answering over Knowledge Graphs"
@@ -36,7 +38,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--hops", type=str, default='1', help = "Number of edges to reach the answer"
+    "--hops", type=int, default=0, help = "Number of edges to reach the answer"
 )
 
 parser.add_argument(
@@ -120,7 +122,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--gpu', type=int, default=0, help = "How many gpus to use"
+    '--gpu', type=int, default=0, help = "Which gpu to use"
 )
 
 parser.add_argument(
@@ -152,22 +154,20 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--use_relation_matching', type=str, help = "Use relation matching suring QA task"
+    '--use_relation_matching', type=str, help = "Use relation matching for QA task"
 )
 
 
 # Exporting enviromental variables
 
-qa_data_path = os.environ['DATA_PATH']
+data_path = os.environ['DATA_PATH']
 checkpoints = os.environ['CHECKPOINTS']
 kge_path = os.environ['KGE_PATH']
 config_files = os.environ['CONFIG_FILES']
-os.environ["CUDA_VISIBLE_DEVICES"]="2,3"
 
 #-------------------------------------
 
-
-def train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_samples, test_samples, args):
+def train(optimizer, model, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_path):
     best_score = -float("inf")
     no_update = 0
     eps = 0.0001
@@ -179,40 +179,38 @@ def train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_sampl
         for phase in phases:
 
             if phase == 'train':
-                qa_model.train()
+                model.train()
                 loader = tqdm(data_loader, total=len(data_loader), unit="batches")
-                score = qa_optimizer.train(loader, epoch)
+                score = optimizer.train(loader, epoch)
                 scheduler.step()
 
             elif phase=='valid':
-                qa_model.eval()
-                answers, score = qa_optimizer.calculate_valid_loss(valid_samples)
+                model.eval()
+                score = optimizer.calculate_valid_loss(valid_samples)
 
-                if score > best_score + eps:
+                if score > best_score + eps and epoch < args.max_epochs:
                     best_score = score
                     no_update = 0
 
                     print("Validation accuracy increased from previous epoch", score)
-                    _, test_score = qa_optimizer.calculate_valid_loss(test_samples)
+                    test_score = optimizer.calculate_valid_loss(test_samples)
                     print('Test score for best valid so far:', test_score)
+                    torch.save(model, '{}'.format(checkpoint_path))
+                    print('Model saved')
 
                 elif (score < best_score + eps) and (no_update < args.patience):
                     no_update +=1
                     print("Validation accuracy decreases to %f from %f, %d more epoch to check"%(score, best_score, args.patience-no_update))
 
-                elif no_update == args.patience or epoch == args.max_epochs-1:
+                if no_update == args.patience or epoch == args.max_epochs-1:
                     print("Model has exceed patience or reached maximum epochs")
-                    exit()
-
-def relation_matching_model():
-    pass
-
+                    return
 
 if __name__ == "__main__":
     args = parser.parse_args()
-
     kge_data_path = "{}/data".format(kge_path)
     dataset_path = "{}/{}_{}".format(kge_data_path, args.dataset, args.kg_type)
+    config_name = '{}_{}_{}_{}'.format(args.dataset, args.kg_type, args.model, args.dim)
 
     ## Compute embeddings for KG
     if args.embeddings:
@@ -223,12 +221,12 @@ if __name__ == "__main__":
         os.system(cmd)
 
         yaml_file = '{}/config.yaml'.format(dataset_path)
-        config_file = '{}/{}/{}_{}_{}_{}'.format(config_files, args.dataset, args.dataset, args.kg_type, args.model, args.dim)
+        config_file = '{}/{}/{}/{}/{}'.format(config_files, args.dataset, args.model, args.kg_type, config_name)
 
         # Check for configuration file
         if os.path.exists(config_file):
             copyfile(config_file, yaml_file)
-            print("Found the corresponding configuration file")
+            print("Found the corresponding configuration file ", config_file)
 
         # If not found create configuration file from arguments
         else:
@@ -238,38 +236,41 @@ if __name__ == "__main__":
         os.system(cmd)
 
         # copy teh best checkpoint and remove files created by LibKGE
-        embedding_path = copy_embeddings(dataset_path, args, qa_data_path)
-#        cmd = "{}/clean.sh {}".format(kge_data_path, dataset_path)
-#        os.system(cmd)
+        embedding_path = copy_embeddings(dataset_path, args, data_path)
+        cmd = "{}/clean.sh {}".format(kge_data_path, dataset_path)
+        os.system(cmd)
 
     ## Reading QA dataset
-    train_data, valid_data, test_data, check_length = read_qa_dataset(args.dataset, args.hops, qa_data_path, args.kg_type)
-    train_samples = process_text_file(train_data, check_length)
-    valid_samples = process_text_file(valid_data, check_length)
-    test_samples = process_text_file(test_data, check_length)
+    qa_dataset_path = '{}/QA_data/{}'.format(data_path, args.dataset)
+    train_data, valid_data, test_data = read_qa_dataset(args.hops, qa_dataset_path)
+    train_samples, heads = process_text_file(train_data)
+    valid_samples, _ = process_text_file(valid_data)
+    test_samples, _ = process_text_file(test_data)
 
     ## Loading trained KG embeddings 
     print('Loading kg embeddings from', embedding_path)
     checkpoint = ('{}/checkpoint_best.pt'.format(embedding_path))
     kge_checkpoint = load_checkpoint(checkpoint)
     kge_model = KgeModel.create_from(kge_checkpoint)
-
     print('Loading entities and relations')
     e, r = preprocess_entities_relations(kge_model, embedding_path)
     entity2idx, idx2entity, embedding_matrix = prepare_embeddings(e)
+    rel2idx, idx2rel, relation_matrix = prepare_embeddings(r)
+    print(len(relation_matrix))
 
-    ## Load QA dataset 
+    ## Create QA dataset 
     print('Process QA dataset')
     word2idx,idx2word, max_len = get_vocab(train_samples)
     vocab_size = len(word2idx)
-    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(data=train_samples, word2idx=word2idx, relations=r, entities=e, entity2idx=entity2idx, idx2entity=idx2entity)
-    data_loader = getattr(dataloaders, 'DataLoader_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=15)
-
-    ## Create QA model
+    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx)
+    data_loader = getattr(dataloaders, 'DataLoader_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=20)
+    
+    ## Creat QA model
     print('Creating QA model')
     device = torch.device(args.gpu if args.use_cuda else "cpu")
     embed_model = getattr(models, args.model)(args, embedding_matrix, device)
     qa_model = getattr(qamodels, '{}_QAmodel'.format(args.qa_nn_type))(args, embed_model, vocab_size)
+    checkpoint_path =  "{}/{}_{}.pt".format(checkpoints, config_name, args.hops)
     qa_model.to(device)
 
     ## Create QA optimizer
@@ -278,8 +279,33 @@ if __name__ == "__main__":
     optimizer = getattr(torch.optim, args.optimizer)(qa_model.parameters(), lr=args.learning_rate_kgqa)
     scheduler = ExponentialLR(optimizer, args.decay)
     qa_optimizer = QAOptimizer(args, qa_model, optimizer, regularizer, dataset, device)
+    train(qa_optimizer, qa_model, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_path)
 
-    train_qa_model(qa_optimizer, qa_model, scheduler, train_samples, valid_samples, test_samples, args)
+    if args.use_relation_matching:
+          checkpoint_path_pr =  "{}/{}_pruning_model_{}_{}.pt".format(checkpoints, args.dataset, args.kg_type, args.hops)
+          train_samples_pr = read_pruning_file('train', qa_dataset_path, rel2idx, args.hops)
+          pr_dataset = getattr(dataloaders, 'DatasetPruning_{}'.format(args.qa_nn_type))(train_samples_pr, rel2idx, idx2rel, word2idx)
+          
+          #-------- Train pruning model ------------#
+          
+          if not os.path.exists(checkpoint_path_pr):
+              valid_samples_pr = read_pruning_file('valid', qa_dataset_path, rel2idx, args.hops)
+              test_samples_pr = read_pruning_file('test', qa_dataset_path, rel2idx, args.hops)
+              data_loader = getattr(dataloaders, 'DataLoaderPruning_{}'.format(args.qa_nn_type))(pr_dataset, batch_size=args.batch_size, shuffle=True, num_workers=15)
+              pr_model = (getattr(pruning_models, '{}_PruningModel'.format(args.qa_nn_type))(args, rel2idx, idx2rel, vocab_size)).to(device)
+              optimizer = getattr(torch.optim, args.optimizer)(pr_model.parameters(), lr=args.learning_rate_kgqa)
+              scheduler = ExponentialLR(optimizer, args.decay)
+              pr_optimizer = PruningOptimizer(args, pr_model, optimizer, regularizer, pr_dataset, device, idx2rel)
+              train(pr_optimizer, pr_model, scheduler, train_samples_pr, valid_samples_pr, test_samples_pr, args, checkpoint_path_pr)
+          
+          #-----------------------------------------#
 
-    
-    
+          ## Load KG triplets
+          train_triplets = read_kg_triplets(dataset_path, type = 'train')
+          valid_triplets = read_kg_triplets(dataset_path, type = 'valid')
+          test_triplets = read_kg_triplets(dataset_path, type = 'test')
+          triplets = np.vstack((train_triplets, valid_triplets))
+          triplets = np.vstack((triplets, test_triplets))
+          G = create_graph(triplets, entity2idx, rel2idx)
+          pruning_model = torch.load(checkpoint_path_pr).to(device)
+          qa_optimizer.compute_accuracy(test_samples, G, pruning_model, pr_dataset, relation_matrix, idx2rel, idx2entity)

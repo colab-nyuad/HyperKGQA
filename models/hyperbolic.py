@@ -20,12 +20,12 @@ class BaseH(KGModel):
         self.act = nn.Softmax(dim=1)
         self.scale = torch.Tensor([1. / np.sqrt(self.rank)]).to(device)
  
-    def similarity_score(self, lhs_e, rhs_e, eval_mode):
+    def similarity_score(self, lhs_e, rhs_e):
         """Compute similarity scores or queries against targets in embedding space."""
         lhs_e, c = lhs_e
         lhs_e = lhs_e.float()
 
-        return - hyp_distance_multi_c(lhs_e, rhs_e, c, eval_mode) ** 2
+        return - hyp_distance_multi_c(lhs_e, rhs_e, c, eval_mode=True) ** 2
 
 class RotH(BaseH):
     """Hyperbolic 2x2 Givens rotations"""

@@ -17,8 +17,10 @@ class BaseP(KGModel):
 
     def __init__(self, args, embedding_matrix):
         super(BaseP, self).__init__(args, embedding_matrix)
+        self.half_dim = None
+        self.half = False
 
-    def similarity_score(self, lhs_e, rhs_e, eval_mode):
+    def similarity_score(self, lhs_e, rhs_e):
         """Compute similarity scores or queries against targets in embedding space."""
         if self.half_dim:
             rhs_e = rhs_e[:, self.half_dim:]
@@ -61,7 +63,7 @@ class CP(BaseP):
 class SimplE(BaseP):
 
     def __init__(self, args, embedding_matrix, device):
-        super(Simple, self).__init__(args, embedding_matrix)
+        super(SimplE, self).__init__(args, embedding_matrix)
         self.half = True
 
     def get_queries(self, head, question):
@@ -103,10 +105,10 @@ class RESCAL(BaseP):
     def get_queries(self, head, question):
         head_e, rel_e = self.get_embeddings(head, question)
         ent_dim = head_e.size(1)
-        head_e = head_e.unsqueeze(1)
+        #head_e = head_e.unsqueeze(1)
+        head_e = head_e.view(-1, 1, ent_dim)
         rel_e = rel_e.view(-1, ent_dim, ent_dim)
         lhs_e = torch.bmm(head_e, rel_e)
         lhs_e = lhs_e.view(-1, ent_dim)
         lhs_e = self.score_dropout(lhs_e)
         return lhs_e
-

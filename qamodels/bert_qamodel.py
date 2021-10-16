@@ -11,6 +11,9 @@ from abc import ABC, abstractmethod
 from transformers import *
 import random
 from qamodels.base_qamodel import Base_QAmodel
+from transformers import DistilBertModel, DistilBertConfig
+from sentence_transformers import SentenceTransformer
+from transformers import RobertaConfig, RobertaModel
 
 class RoBERTa_QAmodel(Base_QAmodel):
 
@@ -18,8 +21,8 @@ class RoBERTa_QAmodel(Base_QAmodel):
 
         super(RoBERTa_QAmodel, self).__init__(args, model, vocab_size)
 
-        self.roberta_pretrained_weights = 'roberta-base'
-        self.roberta_model = RobertaModel.from_pretrained(self.roberta_pretrained_weights)
+        self.roberta_model = RobertaModel.from_pretrained('roberta-base')
+
         for param in self.roberta_model.parameters():
             param.requires_grad = True
 
@@ -50,23 +53,23 @@ class RoBERTa_QAmodel(Base_QAmodel):
             F.log_softmax(scores, dim=1), F.normalize(targets.float(), p=1, dim=1)
         )
 
-    def apply_nonLinear(self, hidden):
-        outputs = self.fcnn_dropout(self.lin1(hidden))
-        outputs = F.relu(outputs)
-        outputs = self.fcnn_dropout(self.lin2(outputs))
-        outputs = F.relu(outputs)
-        outputs = self.lin3(outputs)
-        outputs = F.relu(outputs)
-        outputs = self.lin4(outputs)
-        outputs = F.relu(outputs)
-        outputs = self.hidden2rel(outputs)
+    def apply_nonLinear(self, input):
+        hidden = self.fcnn_dropout(self.lin1(input))
+        hidden = F.relu(hidden)
+        hidden = self.fcnn_dropout(self.lin2(hidden))
+        hidden = F.relu(hidden)
+        hidden = self.lin3(hidden)
+        hidden = F.relu(hidden)
+        hidden = self.lin4(hidden)
+        hidden = F.relu(hidden)
+        outputs = self.hidden2rel(hidden)
 
         if self.hyperbolic_layers:
-            c = F.softplus(self.hidden2c(hidden))
-            rel_diag = self.hidden2rel_diag(hidden)
+            c = F.softplus(self.hidden2c(input))
+            rel_diag = self.hidden2rel_diag(input)
 
             if self.context_layer:
-                context_vec = self.hidden2context(hidden)
+                context_vec = self.hidden2context(input)
                 return outputs, (c, rel_diag, context_vec)
             else:
                 return outputs, (c, rel_diag)
@@ -74,11 +77,12 @@ class RoBERTa_QAmodel(Base_QAmodel):
             return outputs, None
 
     def get_question_embedding(self, question_tokenized, attention_mask):
-        roberta_last_hidden_states = self.roberta_model(question_tokenized, attention_mask=attention_mask)[0]
+        roberta_last_hidden_states = self.roberta_model(question_tokenized, attention_mask)[0]
         states = roberta_last_hidden_states.transpose(1,0)
         question_embedding = states[0]
         return question_embedding
 
 
-    def get_predictions(self, question, head, tail, attention_mask):
-        return super().get_score_ranked(head, question, attention_mask)
+    def get_predictions(self, question, head, attention_mask):
+        pred = super().get_score_ranked(head, question, attention_mask)
+        return pred
