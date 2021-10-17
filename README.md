@@ -31,7 +31,7 @@ This implementation includes the following models:
 - [AttH](https://aclanthology.org/2020.acl-main.617.pdf)
 
 ### Datasets
-The repo presents results for two QA datasets MetaQA and WebQuestionsSP. For description of the underlying KGs please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). The datasets are availbale for download [here](https://drive.google.com/file/d/1VKjZ3HxwxEpYLwqG3iD5VAJmMdyrRbZB/view?usp=sharing). Unzip KGs datasets into kge/data and QA datasets into the folder data/QA_data.
+The repo presents results for two QA datasets MetaQA and WebQuestionsSP. For description of the underlying KGs please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). The datasets are availbale for download [here](https://drive.google.com/file/d/1_hAbc5EJX3N1wWs1lo--XJUS-QYv9g3M/view?usp=sharing). Unzip KGs datasets into kge/data and QA datasets into the folder data/QA_data.
 
 ### Usage
 To train and evaluate a QA task over KG, use the main.py script:
@@ -96,7 +96,11 @@ arguments:
                         Use relation matching for postprocessing candidates in QA task
 ```
 
-Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
+Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat:
+<p align="center">
+  \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> 
+</p>  
+in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
 
 ```
 python main.py --dataset MetaQA --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 \
