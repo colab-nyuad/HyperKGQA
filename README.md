@@ -6,7 +6,7 @@ HyperKGQA proposes a technique that embeds a Knowledge Graph into the hyperbolic
 </p>
 
 ### Installation
-```{sh}
+```
 # retrieve and install project in development mode
 git clone https://github.com/colab-nyuad/Hyperbolic_KGQA.git
 cd kge
@@ -123,7 +123,7 @@ python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/M
 
 ### Using pretrained models
 
-```{python}
+```
 import argparse
 import numpy as np
 from utils.utils import *
