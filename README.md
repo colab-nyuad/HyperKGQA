@@ -140,7 +140,7 @@ from optimizers import QAOptimizer
 
 # Define parameters
 args = argparse.ArgumentParser().parse_args()
-args.hops = 2
+args.hops = 2 # 0 for fbwq
 args.use_relation_matching = False
 args.qa_nn_type = 'LSTM'
 args.max_epochs = 100
@@ -176,7 +176,7 @@ score, predicted_answers = qa_optimizer.calculate_valid_loss(test_samples)
 print('test score' , score)
 
 ## Print first n_q questions & predcited answers
-for i, t in enumerate(test_samples[:nq]):
+for i, t in enumerate(test_samples[:n_q]):
     question = t[1].replace('NE', t[0])
     print('Question: {} \n Predicted Answer: {} \n Answers: {} \n'.format(question, idx2entity[predicted_answers[i]], ','.join(t[2])))
 ```
