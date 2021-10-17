@@ -25,13 +25,13 @@ This implementation includes the following models:
 - [CP](https://arxiv.org/pdf/1806.07297.pdf)
 - [RESCAL](http://www.icml-2011.org/papers/438_icmlpaper.pdf)
 - [DistMult](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/ICLR2015_updated.pdf)
-- [TuckER] (https://arxiv.org/pdf/1901.09590.pdf)
+- [TuckER](https://arxiv.org/pdf/1901.09590.pdf)
 - [RotH](https://aclanthology.org/2020.acl-main.617.pdf)
 - [RefH](https://aclanthology.org/2020.acl-main.617.pdf)
 - [AttH](https://aclanthology.org/2020.acl-main.617.pdf)
 
 ### Datasets
-The repo presents results for two QA datasets MetaQA and WebQuestionsSP. Please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/) for description of the underlying KGs. The datasets are availbale for download [here](https://drive.google.com/file/d/1VKjZ3HxwxEpYLwqG3iD5VAJmMdyrRbZB/view?usp=sharing). Unzip KGs datasets into kge/data and QA datasets into the folder data/QA_data.
+The repo presents results for two QA datasets MetaQA and WebQuestionsSP. For description of the underlying KGs please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). The datasets are availbale for download [here](https://drive.google.com/file/d/1VKjZ3HxwxEpYLwqG3iD5VAJmMdyrRbZB/view?usp=sharing). Unzip KGs datasets into kge/data and QA datasets into the folder data/QA_data.
 
 ### Usage
 To train and evaluate a QA task over KG, use the main.py script:
@@ -99,20 +99,20 @@ arguments:
 Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
 
 ```
-python main.py --dataset MetaQA --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
+python main.py --dataset MetaQA --model AttH --dim 400 --kg_type half --valid_every 5 \--max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
 ```
 
 For Freebase:
 ```
-python main.py --dataset fbwq --model ComplEx --dim 50 --kg_type full --valid_every 10 --max_epochs 200 --learning_rate_kgqa 0.00002 \
---freeze True --do_batch_norm True --batch_size 16 --labels_smoothing 0.05 --qa_nn_type RoBERTa
+python main.py --dataset fbwq --model ComplEx --dim 50 --kg_type full --valid_every 10 \--max_epochs 200 --learning_rate_kgqa 0.00002 
+--freeze True --do_batch_norm True \--batch_size 16 --labels_smoothing 0.05 --qa_nn_type RoBERTa
 ```
   
 To use already pretrained embeddings, please specifiy the path to the folder with files checkpoint_best.pt, entity_ids.del and relation_ids.del:
 
 ```
-python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ --model AttH --dim 400 \
---kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 3
+python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ \--model AttH --dim 400 
+--kg_type half --valid_every 5 --max_epochs 200 \--learning_rate_kgqa 0.0002 --hops 3
 ```
 
 
