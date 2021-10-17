@@ -132,7 +132,6 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
 In the following example, we load a saved kgqa checkpoint and evaluate its performance on the samples of the QA dataset and print some questions from the dataset to explore the predicted answers.
 
 ```python
-  GNU nano 4.8                                                                                         test.py
 import argparse
 import numpy as np
 from utils.utils import *
@@ -181,8 +180,6 @@ for i, t in enumerate(test_samples[:nq]):
     question = t[1].replace('NE', t[0])
     print('Question: {} \n Predicted Answer: {} \n Answers: {} \n'.format(question, idx2entity[predicted_answers[i]], ','.join(t[2])))
 ```
-  
-### Experiments
- 
+
 
 ### How to cite
