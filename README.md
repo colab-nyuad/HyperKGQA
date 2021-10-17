@@ -132,21 +132,28 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
 In the following example, we load a saved kgqa checkpoint and evaluate its performance on the samples of the QA dataset and print some questions from the dataset to explore the predicted answers.
 
 ```python
+  GNU nano 4.8                                                                                         test.py
 import argparse
 import numpy as np
 from utils.utils import *
 import dataloaders, qamodels
 from optimizers import QAOptimizer
 
+# Define parameters
 args = argparse.ArgumentParser().parse_args()
 args.hops = 2
 args.use_relation_matching = False
 args.qa_nn_type = 'LSTM'
 args.max_epochs = 100
 args.batch_size = 100
+n_q = 10
 
-entity2idx = read_inv_dict('kge/data/MetaQA_half/entity_ids.del')
+# Specify paths to the file entity_ids and QA dataset
+entity_ids_path = 'kge/data/MetaQA_half/entity_ids.del'
 qa_dataset_path = 'data/QA_data/MetaQA'
+
+idx2entity = read_dict(entity_ids_path)
+entity2idx = read_inv_dict(entity_ids_path)
 
 # Load QA data
 train_data, _, test_data = read_qa_dataset(args.hops, qa_dataset_path)
@@ -166,8 +173,13 @@ qa_model = torch.load(checkpoint_path)
 ## Create QA optimizer
 qa_optimizer = QAOptimizer(args, qa_model, None, None, dataset, device)
 
-score = qa_optimizer.calculate_valid_loss(test_samples)
+score, predicted_answers = qa_optimizer.calculate_valid_loss(test_samples)
 print('test score' , score)
+
+## Print first n_q questions & predcited answers
+for i, t in enumerate(test_samples[:nq]):
+    question = t[1].replace('NE', t[0])
+    print('Question: {} \n Predicted Answer: {} \n Answers: {} \n'.format(question, idx2entity[predicted_answers[i]], ','.join(t[2])))
 ```
   
 ### Experiments
