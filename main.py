@@ -212,6 +212,10 @@ if __name__ == "__main__":
     dataset_path = "{}/{}_{}".format(kge_data_path, args.dataset, args.kg_type)
     config_name = '{}_{}_{}_{}'.format(args.dataset, args.kg_type, args.model, args.dim)
 
+    ## Checkpoints folder
+    if not os.path.exists(checkpoints):
+        os.makedirs(checkpoints)
+
     ## Compute embeddings for KG
     if args.embeddings:
         embedding_path = args.embeddings

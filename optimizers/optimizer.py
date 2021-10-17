@@ -31,7 +31,7 @@ class QAOptimizer(object):
         self.device = device
         self.batch_size = args.batch_size
         self.max_epochs = args.max_epochs
-        self.gamma = 10 # 5 for half # 10 for full
+        self.gamma = 5 # 5 for half # 10 for full
         self.score_func = nn.CosineSimilarity(dim=0, eps=1e-6)
         self.use_relation_matching = args.use_relation_matching
     
@@ -91,7 +91,6 @@ class QAOptimizer(object):
         return np.sum(score)
 
     def compute_accuracy(self, samples, G, pruning_model, pr_dataset, relation_matrix, idx2rel, idx2entity): 
-        samples = samples[:100]
         data_gen = self.dataset.data_generator(samples) 
         total_correct = 0 
 
@@ -112,6 +111,7 @@ class QAOptimizer(object):
             question_tokenized = question_tokenized.unsqueeze(0).to(self.device)
             attention_mask = attention_mask.unsqueeze(0).to(self.device)
             pr_scores = pruning_model.get_score_ranked(question_tokenized, attention_mask)
+            
             if self.hops == 0:
                 pruning_rels_scores, pruning_rels_torch = torch.topk(pr_scores, 5)
                 pruning_rels = [p.item() for s, p in zip(pruning_rels_scores, pruning_rels_torch) if s > self.thresh]
@@ -127,12 +127,6 @@ class QAOptimizer(object):
             else:
                 pred_ans = candidates[0]
                 max_score = scores[0]
-
-
-            print('question', samples[i])
-            print([idx2rel[pr] for pr in pruning_rels])
-            print('predcited', idx2entity[pred_ans], max_score)
-            print('ans', ans)
 
             for i, c in enumerate(candidates):
                 candidate_rels = get_relations_in_path(G, head.item(), c, self.hops)
