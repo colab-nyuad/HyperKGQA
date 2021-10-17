@@ -6,7 +6,7 @@ HyperKGQA proposes a technique that embeds a Knowledge Graph into the hyperbolic
 </p>
 
 ### Installation
-```
+```sh
 # retrieve and install project in development mode
 git clone https://github.com/colab-nyuad/Hyperbolic_KGQA.git
 cd kge
@@ -36,7 +36,7 @@ The repo presents results for two QA datasets MetaQA and WebQuestionsSP. For des
 ### Usage
 To train and evaluate a QA task over KG, use the main.py script:
 
-```{sh}
+```sh
 usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
               [--model {TransE,RESCAL,CP,Distmult,SimplE,RotH,RefH,AttH,ComplEx,RotatE}]
               [--hops HOPS] [--regularizer {L3}] 
@@ -101,29 +101,35 @@ Running the script main.py computes KG embeddings using [LibKGE](https://github.
 ### Sample Commands
 Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
 
-```{sh}
+```sh
 python main.py --dataset MetaQA --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 \
 --learning_rate_kgqa 0.0002 --hops 1 --qa_nn_type LSTM
 ```
 
 For Freebase:
-```{sh}
+```sh
 python main.py --dataset fbwq --model ComplEx --dim 50 --kg_type full --valid_every 10 --max_epochs 200 \
---learning_rate_kgqa 0.00002 --freeze True --do_batch_norm True --batch_size 16 --labels_smoothing 0.05 \
---qa_nn_type RoBERTa
+--learning_rate_kgqa 0.00002 --freeze True --batch_size 16 --qa_nn_type RoBERTa
 ```
   
 To use already pretrained embeddings, please specifiy the path to the folder with files checkpoint_best.pt, entity_ids.del and relation_ids.del:
 
-```{sh}
+```sh
 python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ \
 --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 3 \
 --qa_nn_type LSTM
 ```
+  
+Compute performance with relation matching:
+```sh
+python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_every 10 --max_epochs 200 \
+--learning_rate_kgqa 0.00002 --freeze True --batch_size 16 --qa_nn_type RoBERTa --use_relation_matching True
+```
+  
 
 ### Using pretrained models
 
-```{
+```python
 import argparse
 import numpy as np
 from utils.utils import *
@@ -160,11 +166,8 @@ qa_optimizer = QAOptimizer(args, qa_model, None, None, dataset, device)
 
 score = qa_optimizer.calculate_valid_loss(test_samples)
 print('test score' , score)
-}```
+}
   
-### Relation matching 
- 
- 
 ### Experiments
  
 
