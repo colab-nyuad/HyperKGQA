@@ -1,7 +1,9 @@
 # HyperbolicKGQA
 HyperKGQA proposes a technique that embeds a Knowledge Graph into the hyperbolic space  and  leverages  this  pre-trained  embeddings  to  map  questions' representation  into entities  and  relationships  space. An extensive set of experiments was run on two benchmark datasets using code published in this repository. The results show that the proposed  method  performs  better  than the state-of-the-art techniques when reasoning on arbitrary multi-hop questions over large sparse graphs.
 
-<img src="architecture.jpg" width="800">
+<p align="center">
+<img src="architecture.jpg" width="500">
+</p>
 
 ### Installation
 ```sh
