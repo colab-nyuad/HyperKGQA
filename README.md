@@ -123,7 +123,7 @@ python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/M
 
 ### Using pretrained models
 
-```
+```{
 import argparse
 import numpy as np
 from utils.utils import *
@@ -160,7 +160,7 @@ qa_optimizer = QAOptimizer(args, qa_model, None, None, dataset, device)
 
 score = qa_optimizer.calculate_valid_loss(test_samples)
 print('test score' , score)
-
+}
 ```
   
 ### Relation matching 
