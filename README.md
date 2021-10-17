@@ -18,25 +18,20 @@ source set_env.sh
 ```
 ### Avilable models
 This implementation includes the following models:
-- ComplEx [1]
-- RotataE [2]
-- TransE [3]
-- Simple [4]
-- CP [5]
-- RESCAL [6]
-- DistMult [7]
-- RotH [8]
-- RefH [8]
-- AttH [8]
+- [ComplEx](http://proceedings.mlr.press/v48/trouillon16.pdf)
+- [RotataE](https://arxiv.org/pdf/1902.10197.pdf)
+- [TransE](https://papers.nips.cc/paper/2013/file/1cecc7a77928ca8133fa24680a88d2f9-Paper.pdf)
+- [Simple](https://arxiv.org/pdf/1802.04868.pdf)
+- [CP](https://arxiv.org/pdf/1806.07297.pdf)
+- [RESCAL](http://www.icml-2011.org/papers/438_icmlpaper.pdf)
+- [DistMult](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/ICLR2015_updated.pdf)
+- [TuckER] (https://arxiv.org/pdf/1901.09590.pdf)
+- [RotH](https://aclanthology.org/2020.acl-main.617.pdf)
+- [RefH](https://aclanthology.org/2020.acl-main.617.pdf)
+- [AttH](https://aclanthology.org/2020.acl-main.617.pdf)
 
 ### Datasets
-The repo presents results for two QA datasets MetaQA and WebQuestionsSP. Sparse MetaQA KG contains only 50% of the triples (randomly selected without replacement). 
-For WebQuestionsSP the underlying KG was created by selecting a subset of Freebase, which contains all facts that are within 2-hops of any entity mentioned in the questions pruned to contain only those relations that are in the QA dataset. For the sparse version 50% of the edges were sampled.
-
-Please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using
-Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/).
- 
-Please download the zip file with KG and QA datasets [here](https://drive.google.com/file/d/1VKjZ3HxwxEpYLwqG3iD5VAJmMdyrRbZB/view?usp=sharing). Unzip KGs datasets into kge/data and QA_data into the folder data.
+The repo presents results for two QA datasets MetaQA and WebQuestionsSP. Please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/) for description of the underlying KGs. The datasets are availbale for download [here](https://drive.google.com/file/d/1VKjZ3HxwxEpYLwqG3iD5VAJmMdyrRbZB/view?usp=sharing). Unzip KGs datasets into kge/data and QA datasets into the folder data/QA_data.
 
 ### Usage
 To train and evaluate a QA task over KG, use the main.py script:
@@ -104,26 +99,28 @@ arguments:
 Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
 
 ```
-python main.py --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
-```
-  
-To use already pretrained embeddings, please specifiy the path to the folder with files checkpoint_best.pt, entity_ids.del and relation_ids.del. Following is an example of such command for MetaQA:
-
-```
-python main.py --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ --model AttH --dim 400 \
---kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
+python main.py --dataset MetaQA --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 1
 ```
 
-for Freebase:
+For Freebase:
 ```
-python main.py --embeddings data/pretrained_models/embeddings/fbwq/ComplEx_fbwq_full_50/ --model ComplEx --dim 50 \ 
---kg_type full --valid_every 10 --max_epochs 200 --learning_rate_kgqa 0.00002 --freeze True --do_batch_norm True \
---batch_size 16 --labels_smoothing 0.05 --qa_nn_type RoBERTa
+python main.py --dataset fbwq --model ComplEx --dim 50 --kg_type full --valid_every 10 --max_epochs 200 --learning_rate_kgqa 0.00002 \
+--freeze True --do_batch_norm True --batch_size 16 --labels_smoothing 0.05 --qa_nn_type RoBERTa
 ```
   
+To use already pretrained embeddings, please specifiy the path to the folder with files checkpoint_best.pt, entity_ids.del and relation_ids.del:
+
+```
+python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ --model AttH --dim 400 \
+--kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 3
+```
+
+
+  
+### Relation matching 
+ 
+ 
 ### Experiments
  
-
-
 
 ### How to cite
