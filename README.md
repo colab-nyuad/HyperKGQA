@@ -100,21 +100,22 @@ Running the script main.py computes KG embeddings using [LibKGE](https://github.
 
 ```
 python main.py --dataset MetaQA --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 \
---learning_rate_kgqa 0.0002 --hops 1
+--learning_rate_kgqa 0.0002 --hops 1 --qa_nn_type LSTM
 ```
 
 For Freebase:
 ```
 python main.py --dataset fbwq --model ComplEx --dim 50 --kg_type full --valid_every 10 --max_epochs 200 \
---learning_rate_kgqa 0.00002 --freeze True --do_batch_norm True --batch_size 16 --labels_smoothing 0.05 --qa_nn_type RoBERTa
+--learning_rate_kgqa 0.00002 --freeze True --do_batch_norm True --batch_size 16 --labels_smoothing 0.05 \
+--qa_nn_type RoBERTa
 ```
   
 To use already pretrained embeddings, please specifiy the path to the folder with files checkpoint_best.pt, entity_ids.del and relation_ids.del:
 
 ```
 python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/MetaQA/AttH_MetaQA_half_400/ \
---model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 \
---learning_rate_kgqa 0.0002 --hops 3
+--model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 3 \
+--qa_nn_type LSTM
 ```
 
 
