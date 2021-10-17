@@ -97,7 +97,8 @@ arguments:
 ```
 
 Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. 
-  
+
+### Sample Commands
 Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
 
 ```
@@ -120,7 +121,47 @@ python main.py --dataset MetaQA --embeddings data/pretrained_models/embeddings/M
 --qa_nn_type LSTM
 ```
 
+### Using pretrained models
 
+```
+  import argparse
+import numpy as np
+from utils.utils import *
+import dataloaders, qamodels
+from optimizers import QAOptimizer
+
+args = argparse.ArgumentParser().parse_args()
+args.hops = 2
+args.use_relation_matching = False
+args.qa_nn_type = 'LSTM'
+args.max_epochs = 100
+args.batch_size = 100
+
+entity2idx = read_inv_dict('kge/data/MetaQA_half/entity_ids.del')
+qa_dataset_path = 'data/QA_data/MetaQA'
+
+# Load QA data
+train_data, _, test_data = read_qa_dataset(args.hops, qa_dataset_path)
+train_samples, _ = process_text_file(train_data)
+test_samples, _ = process_text_file(test_data)
+
+## Create QA dataset
+word2idx,idx2word, max_len = get_vocab(train_samples)
+vocab_size = len(word2idx)
+dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx)
+
+## Creat QA model
+device = torch.device(0)
+checkpoint_path = 'checkpoints/MetaQA_half_AttH_200_2.pt'
+qa_model = torch.load(checkpoint_path)
+
+## Create QA optimizer
+qa_optimizer = QAOptimizer(args, qa_model, None, None, dataset, device)
+
+score = qa_optimizer.calculate_valid_loss(test_samples)
+print('test score' , score)
+
+```
   
 ### Relation matching 
  
