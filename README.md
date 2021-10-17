@@ -129,7 +129,7 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
 
 ### Using pretrained models
 
-In the following example, we load a saved kgqa checkpoint and evaluate its performance on the samples of the QA dataset and print some questions from the dataset to explore the predicted answers.
+In the following example, we load a saved kgqa checkpoint, evaluate its performance and print some questions from the dataset to explore the predicted answers.
 
 ```python
 import argparse
