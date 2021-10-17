@@ -129,6 +129,8 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
 
 ### Using pretrained models
 
+In the following example, we load a saved kgqa checkpoint and evaluate its performance on the samples of the QA dataset and print some questions from the dataset to explore the predicted answers.
+
 ```python
 import argparse
 import numpy as np
@@ -166,7 +168,7 @@ qa_optimizer = QAOptimizer(args, qa_model, None, None, dataset, device)
 
 score = qa_optimizer.calculate_valid_loss(test_samples)
 print('test score' , score)
-}
+```
   
 ### Experiments
  
