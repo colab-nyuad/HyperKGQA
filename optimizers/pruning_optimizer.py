@@ -40,6 +40,7 @@ class PruningOptimizer(object):
     def calculate_valid_loss(self, samples, checkpoint_path = None):
         data_gen = self.dataset.data_generator(samples)
         total_correct = 0
+        predicted_ans = []
 
         for i in tqdm(range(len(samples))):
             d = next(data_gen)
@@ -49,16 +50,15 @@ class PruningOptimizer(object):
             rel_id_list = d[2]
             scores = self.model.get_score_ranked(question, question_param)
             pred = torch.topk(scores, k=1)[1]
-#            print(question)
-
-#            print(pred.item(), self.idx2rel[pred.item()], samples[i][0])
 
             if pred in rel_id_list:
                 total_correct = total_correct + 1
+            
+            predicted_ans.append(pred)
 
         print(total_correct)
         accuracy = total_correct/len(samples)
-        return accuracy
+        return accuracy, predicted_ans
 
     def train(self, loader, epoch):
 

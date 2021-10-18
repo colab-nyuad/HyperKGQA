@@ -186,14 +186,14 @@ def train(optimizer, model, scheduler, train_samples, valid_samples, test_sample
 
             elif phase=='valid':
                 model.eval()
-                score = optimizer.calculate_valid_loss(valid_samples)
+                score, _ = optimizer.calculate_valid_loss(valid_samples)
 
                 if score > best_score + eps and epoch < args.max_epochs:
                     best_score = score
                     no_update = 0
 
                     print("Validation accuracy increased from previous epoch", score)
-                    test_score = optimizer.calculate_valid_loss(test_samples)
+                    test_score, _ = optimizer.calculate_valid_loss(test_samples)
                     print('Test score for best valid so far:', test_score)
                     torch.save(model, '{}'.format(checkpoint_path))
                     print('Model saved')

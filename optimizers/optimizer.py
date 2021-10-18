@@ -51,6 +51,7 @@ class QAOptimizer(object):
     def calculate_valid_loss(self, samples):
         data_gen = self.dataset.data_generator(samples)
         total_correct = 0
+        predicted_answers = []
 
         for i in tqdm(range(len(samples))):
             d = next(data_gen)
@@ -76,10 +77,12 @@ class QAOptimizer(object):
 
             if pred_ans in ans:
                 total_correct += 1
+            
+            predicted_answers.append(pred_ans)
 
         print(total_correct)
         accuracy = total_correct/len(samples)
-        return accuracy
+        return accuracy, predicted_answers
 
     def compute_minkowski_distance(self, p, r):
         return -distance.minkowski(p.tolist(), r.tolist(), 3)
