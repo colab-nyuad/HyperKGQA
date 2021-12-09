@@ -10,9 +10,6 @@ import networkx as nx
 from utils.utils import get_relations_in_path
 from scipy.spatial import distance
 from sklearn.metrics.pairwise import cosine_similarity
-from utils.hyperbolic import expmap0
-from scipy.spatial import distance
-import math
 
 class QAOptimizer(object):
     """Knowledge Graph embedding model optimizer.
@@ -44,7 +41,6 @@ class QAOptimizer(object):
 
         if self.model.ls:
             p_tail = ((1.0-self.model.ls)*p_tail) + (1.0/p_tail.size(1))
-
         loss = self.model.loss(pred, p_tail)
 
         if not self.model.freeze:
@@ -143,8 +139,7 @@ class QAOptimizer(object):
                 total_correct += 1
         accuracy = total_correct/len(samples)
         print(accuracy)
-        #return accuracy
-
+        return accuracy
 
     def train(self, loader, epoch):
 

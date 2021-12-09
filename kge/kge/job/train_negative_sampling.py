@@ -122,7 +122,7 @@ class TrainingJobNegativeSampling(TrainingJob):
             num_samples = self._sampler.num_samples[slot]
             if num_samples <= 0:
                 continue
-            
+
             # construct gold labels: first column corresponds to positives,
             # remaining columns to negatives
             if labels[slot] is None or labels[slot].shape != (
@@ -142,14 +142,12 @@ class TrainingJobNegativeSampling(TrainingJob):
             scores[:, 0] = self.model.score_spo(
                 triples[:, S], triples[:, P], triples[:, O], direction=SLOT_STR[slot],
             )
-            
             result.forward_time += time.time()
             scores[:, 1:] = batch_negative_samples[slot].score(
                 self.model, indexes=subbatch_slice
             )
             result.forward_time += batch_negative_samples[slot].forward_time
             result.prepare_time += batch_negative_samples[slot].prepare_time
-            
             # compute loss for slot in subbatch (concluding the forward pass)
             result.forward_time -= time.time()
             loss_value_torch = (

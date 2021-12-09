@@ -11,7 +11,6 @@ from torch.nn.init import xavier_normal_
 from transformers import *
 
 class LSTM_PruningModel(nn.Module):
-
     def __init__(self, args, rel2idx, vocab_size):
         super(LSTM_PruningModel, self).__init__()
         self.rank = args.dim

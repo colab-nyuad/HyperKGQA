@@ -50,7 +50,6 @@ def extract_embeddings(embedder, inst_dict, bias=False):
 
     return inst2idx, idx2inst, embedding_matrix, bh, bt
 
-
 def process_text_file(text_file):
     data_array = []
     heads = []
@@ -91,13 +90,13 @@ def read_kg_triplets(dataset, type):
             triplets.append(data)
         return np.array(triplets)
 
-def create_graph(triplets, entity2idx, rel2idx):
-    G = nx.MultiGraph()
+
+def create_graph(triplets, entity2idx, rel2idx, type='undirected'):
+    G = nx.MultiGraph() if type == 'undirected' else nx.MultiDiGraph()
     return add_triplets_to_graph(G, triplets, entity2idx, rel2idx)
 
 def add_triplets_to_graph(G, triplets, entity2idx, rel2idx, strip=False):
     for t in tqdm(triplets):
-        
         if strip:
             t[0] = t[0].strip()
             t[2] = t[2].strip()
@@ -107,7 +106,6 @@ def add_triplets_to_graph(G, triplets, entity2idx, rel2idx, strip=False):
         G.add_node(e2)
         G.add_edge(e1, e2, name=rel2idx[t[1]], weight=1)
     return G
-
 
 def get_relations_in_path(G, head, tail, neighborhood=3):
     try:
@@ -119,8 +117,6 @@ def get_relations_in_path(G, head, tail, neighborhood=3):
                 n_edges = G.number_of_edges(ea[0], ea[1])
                 relations.extend([G.edges[ea[0], ea[1], i]['name'] for i in range(n_edges)])
         return set(relations)
-    except nx.exception.NetworkXNoPath:
-        return []
 
 def read_pruning_file(type, dataset_path, rel2idx, hops):
     if hops != 0:

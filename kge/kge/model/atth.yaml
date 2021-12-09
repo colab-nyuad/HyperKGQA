@@ -9,4 +9,3 @@ atth:
     type: hyperbolic_relation_embedder
     +++: +++
   init_size: 1e-3
-

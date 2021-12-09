@@ -20,7 +20,6 @@ class RefHScorer(RelationalScorer):
         self.rank = self.get_option("relation_embedder.dim") // 2
 
     def score_emb(self, s_emb, p_emb, o_emb, combine: str):
-
         if combine not in ["sp_", "spo"]:
             raise Exception(
                "Combine {} not supported in RefH's score function".format(combine)
@@ -62,7 +61,6 @@ class RefH(KgeModel):
     ):
 
         self._init_configuration(config, configuration_key)
-
         self.set_option("relation_embedder.dim", self.get_option("relation_embedder.dim") * 2)
         self.set_option("entity_embedder.dim", self.get_option("entity_embedder.dim") + 2)
 
@@ -76,7 +74,6 @@ class RefH(KgeModel):
 
         self.set_option("relation_embedder.dim", self.get_option("relation_embedder.dim") // 2)
         self.set_option("entity_embedder.dim", self.get_option("entity_embedder.dim") - 2)
-
 
     def score_so(self, s, o, p=None):
         raise Exception("The hyperbolic model cannot score relations.")

@@ -89,7 +89,7 @@ class TuckER(BaseP):
         x = torch.bmm(x, W_mat)
         x = x.view(-1, ent_dim)
 
-        return lhs_e
+        return x
 
 class RESCAL(BaseP):
 
@@ -103,4 +103,5 @@ class RESCAL(BaseP):
         rel_e = rel_e.view(-1, ent_dim, ent_dim)
         lhs_e = torch.bmm(head_e, rel_e)
         lhs_e = lhs_e.view(-1, ent_dim)
+
         return lhs_e

@@ -19,7 +19,6 @@ class Dataset_RoBERTa(Dataset):
         self.entity2idx = entity2idx
         self.tokenizer_class = RobertaTokenizer
         self.pretrained_weights = 'roberta-base'
-        self.d_type = dtype
         self.tokenizer = self.tokenizer_class.from_pretrained(self.pretrained_weights, cache_dir='.')
 
     def get_shape(self):

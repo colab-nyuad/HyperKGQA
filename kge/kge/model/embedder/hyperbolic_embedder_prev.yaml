@@ -1,0 +1,25 @@
+import: [lookup_embedder]
+
+hyperbolic_embedder:
+  class_name: HyperbolicEmbedder
+  base_embedder:
+    type: lookup_embedder
+    +++: +++
+  dim: -1                     # -1 means: same as base_embedder
+  initialize: normal_          # xavier, uniform, normal
+  initialize_args:
+    +++: +++
+  dropout: 0.                 # dropout used for embeddings
+  normalize:
+    p: -1
+  regularize: 'lp'              # '', 'lp'
+  regularize_weight: 0.0
+  regularize_args:
+    weighted: False
+    p: 2
+  sparse: False
+  round_dim_to: []
+  init_size: 1e-3
+
+
+

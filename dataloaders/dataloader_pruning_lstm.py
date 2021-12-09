@@ -12,6 +12,7 @@ import numpy as np
 import string
 
 class DatasetPruning_LSTM(Dataset):
+
     def __init__(self, data, rel2idx, word2idx):
         self.data = data
         self.rel2idx = rel2idx

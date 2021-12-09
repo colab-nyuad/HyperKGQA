@@ -15,6 +15,7 @@ from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
 import networkx as nx
 import ast
 import json
+
 import dataloaders
 import optimizers
 import qamodels
@@ -132,6 +133,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 #-------------------------------------
 
 def train(optimizer, model, data_loader, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_path):
+
     best_score = -float("inf")
     no_update = 0
     eps = 0.0001
@@ -195,7 +197,7 @@ def train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2i
     optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.learning_rate)
     scheduler = ExponentialLR(optimizer, args.decay)
     optimizer = PruningOptimizer(args, model, optimizer, regularizer, dataset, device)
-#    train(optimizer, model, data_loader, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_prm_path)
+    train(optimizer, model, data_loader, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_prm_path)
 
     return checkpoint_prm_path, dataset
 
@@ -221,8 +223,9 @@ if __name__ == "__main__":
 
     ## Create QA dataset 
     print('Process QA dataset')
-    word2idx,idx2word, vocab_size = get_vocab(train_samples)
-    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx, args.dtype)
+    word2idx,idx2word, max_len = get_vocab(train_samples)
+    vocab_size = len(word2idx)
+    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx)
     data_loader = getattr(dataloaders, 'DataLoader_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=20)
     
     ## Creat QA model

@@ -6,7 +6,6 @@ from kge.model.embedder.projection_embedder import ProjectionEmbedder
 from kge.model.embedder.tucker3_relation_embedder import Tucker3RelationEmbedder
 from kge.model.embedder.hyperbolic_relation_embedder import HyperbolicRelationEmbedder
 
-
 # models
 from kge.model.complex import ComplEx
 from kge.model.conve import ConvE

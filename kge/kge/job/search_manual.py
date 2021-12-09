@@ -79,7 +79,6 @@ class ManualSearchJob(SearchJob):
         best_metric_per_job = [None] * len(search_configs)
         for ibm in self.ready_task_results:
             i, best, best_metric = ibm
-            print(i, best, best_metric)
             best_per_job[i] = best
             best_metric_per_job[i] = best_metric
 

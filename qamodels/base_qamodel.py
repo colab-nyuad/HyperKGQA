@@ -43,6 +43,7 @@ class Base_QAmodel(nn.Module):
     @abstractmethod
     def get_question_embedding(self, question, question_len):
         pass
+
     @abstractmethod
     def calculate_valid_loss(self, samples):
         pass

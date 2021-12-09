@@ -12,7 +12,6 @@ class BaseC(KGModel):
     Attributes:
         embeddings: complex embeddings for entities and relations
     """
-
     def __init__(self, args, device):
         """Initialize a Complex KGModel."""
         super(BaseC, self).__init__(args)
@@ -50,7 +49,6 @@ class ComplEx(BaseC):
     def get_queries(self, head, question):
         """Compute embedding and biases of queries."""
         head_e, rel_e = self.get_embeddings(head, question)
-
         lhs_e = torch.cat([
             head_e[0] * rel_e[0] - head_e[1] * rel_e[1],
             head_e[0] * rel_e[1] + head_e[1] * rel_e[0]
@@ -67,6 +65,7 @@ class RotatE(BaseC):
         rel_norm = torch.sqrt(rel_e[0] ** 2 + rel_e[1] ** 2)
         cos = rel_e[0] / rel_norm
         sin = rel_e[1] / rel_norm
+
         lhs_e = torch.cat([
             head_e[0] * cos - head_e[1] * sin,
             head_e[0] * sin + head_e[1] * cos

@@ -8,9 +8,9 @@ from kge.job import Job
 from kge.util.hyperbolic import *
 
 class RotHScorer(RelationalScorer):
-    r"""Implementation of the Hyperblic RotH KGE scorer.
 
-    Reference: `_
+    r"""Implementation of the Hyperblic RotH KGE scorer.
+        Reference: `_
 
     """
 
@@ -64,6 +64,7 @@ class RotH(KgeModel):
     ):
 
         self._init_configuration(config, configuration_key)
+
 
         # double dimension for relation embedding
         self.set_option("relation_embedder.dim", self.get_option("relation_embedder.dim") * 2)

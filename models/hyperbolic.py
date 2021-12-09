@@ -94,5 +94,5 @@ class AttH(BaseH):
         rel, _ = torch.chunk(rel_e, 2, dim=1)
         rel = expmap0(rel, c)
         res = project(mobius_add(lhs, rel, c), c)
-        return (res, c, self.bh(head))
 
+        return (res, c, self.bh(head))
