@@ -1,9 +1,5 @@
-# HyperbolicKGQA
+# HYPER_KGQA
 HyperKGQA proposes a technique that embeds a Knowledge Graph into the hyperbolic space  and  leverages  this  pre-trained  embeddings  to  map  questions' representation  into entities  and  relationships  space. An extensive set of experiments was run on two benchmark datasets using code published in this repository. The results show that the proposed  method  performs  better  than the state-of-the-art techniques when reasoning on arbitrary multi-hop questions over large sparse graphs.
-
-<p align="center">
-<img src="architecture.jpg" width="700">
-</p>
 
 ### Installation
 ```sh
@@ -43,16 +39,12 @@ usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
               [--reg REG] [--optimizer {Adagrad,Adam}]
               [--max_epochs MAX_EPOCHS] [--valid_every VALID]
               [--dim RANK] [--patience PATIENCE]
-              [--batch_size BATCH_SIZE] [--kg_batch_size KG_BATCH_SIZE]
-              [--ent_dropout DROPOUT] [--rel_dropout DROPOUT]
-              [--score_dropout DROPOUT] [--nn_dropout DROPOUT]
-              [--learning_rate_kge LEARNING_RATE]
-              [--learning_rate_kgqa LEARNING_RATE]
+              [--batch_size BATCH_SIZE]
+              [--learning_rate LEARNING_RATE]
               [--freeze FREEZE] [--use_cuda USE_CUDA]
-              [--num_workers NUM_WORKERS] [--do_batch_norm BATCH_NORM]
+              [--num_workers NUM_WORKERS]
               [--qa_nn_type {LSTM,RoBERTa}] ---gpu GPU]
               [--use_relation_matching USE_RELATION_MATCHING]
-              [--init_size INIT_SIZE] [--embeddings KG_EMBEDDINGS_PATH]
               [--labels_smoothing LABELS_SMOOTHING]
  
 Knowledge Graph QA
@@ -73,23 +65,14 @@ arguments:
   --patience            Number of epochs before early stopping for KG embeddings
   --valid_every         Number of epochs before validation for QA task
   --dim                 Embedding dimension
-  --batch_size          Batch size for QA task
-  --kg_batch_size       Batch size for computing KG embeddings 
-  --learning_rate_kgqa  Learning rate for QA task
-  --learning_rate_kge   Learning rate for computing KG embeddings
-  --hops                Number of edges to reason over to reach the answer
-  --ent_dropout         Entity Dropout rate used in QA score function 
-  --rel_dropout         Relation Dropout rate used in QA score function
-  --score_dropout       Score Dropout rate used in QA score function
-  --nn_dropout          Dropout rate for fully connected layers with RoBERTa 
+  --batch_size          Batch size for QA task 
+  --learning_rate       Learning rate for QA task
+  --hops                Number of edges to reason over to reach the answer 
   --freeze              Freeze weights of trained KG embeddings
   --use_cuda            Use gpu
   --gpu                 How many gpus to use
   --num_workers         Number of workers for parallel computing 
-  --do_batch_norm       Do batch normalization for ComplEx and RotatE
   --labels_smoothing    Labels smoothing
-  --init_size           Initial embeddings' scale for hyperbolic embeddings
-  --embeddings          Path to the folder with computed embeddings for KG
   --qa_nn_type {LSTM,RoBERTa}
                         Which NN to use for question embeddings
   --use_relation_matching 
