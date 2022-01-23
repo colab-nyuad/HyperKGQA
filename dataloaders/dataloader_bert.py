@@ -13,7 +13,7 @@ from transformers import *
 
 
 class Dataset_RoBERTa(Dataset):
-    def __init__(self, data, word2idx, entity2idx, dtype):
+    def __init__(self, data, word2idx, entity2idx):
         self.data = data
         self.word2idx = word2idx
         self.entity2idx = entity2idx
@@ -37,10 +37,7 @@ class Dataset_RoBERTa(Dataset):
         indices = torch.LongTensor(indices)
         batch_size = len(indices)
         vec_len = len(self.entity2idx)
-        if self.d_type == 'double':
-            one_hot = torch.DoubleTensor(vec_len)
-        else:
-            one_hot = torch.FloatTensor(vec_len)
+        one_hot = torch.FloatTensor(vec_len)
         one_hot.zero_()
         one_hot.scatter_(0, indices, 1)
         return one_hot

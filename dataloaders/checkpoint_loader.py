@@ -63,7 +63,7 @@ class CheckpointLoader():
 
     def load_data(self, embed_model):
         if self.checkpoint_type == 'ldh':
-            checkpoint = '{}/checkpoint.pt'.format(self.embedding_path)
+            checkpoint = '{}/model.pt'.format(self.embedding_path)
             embed_model.load_state_dict(torch.load(checkpoint))
             self.relation_matrix = embed_model.rel.weight.data.cpu()
         else:

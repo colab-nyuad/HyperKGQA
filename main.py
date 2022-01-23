@@ -51,7 +51,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--regularizer", choices=["L3"], default="L3", help="Regularizer"
+    "--regularizer", choices=["F2"], default="F2", help="Regularizer"
 )
 
 parser.add_argument(

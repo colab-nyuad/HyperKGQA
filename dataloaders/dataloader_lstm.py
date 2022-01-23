@@ -11,11 +11,10 @@ from tqdm import tqdm
 import numpy as np
 
 class Dataset_LSTM(Dataset):
-    def __init__(self, data, word2idx, entity2idx, dtype):
+    def __init__(self, data, word2idx, entity2idx):
         self.data = data
         self.entity2idx = entity2idx
         self.word2idx = word2idx        
-        self.d_type = dtype
 
     def get_shape(self):
         return self.kg_size
@@ -27,10 +26,7 @@ class Dataset_LSTM(Dataset):
         indices = torch.LongTensor(indices)
         batch_size = len(indices)
         vec_len = len(self.entity2idx)
-        if self.d_type == 'double':
-            one_hot = torch.DoubleTensor(vec_len)
-        else:
-            one_hot = torch.FloatTensor(vec_len)
+        one_hot = torch.DoubleTensor(vec_len)
         one_hot.zero_()
         one_hot.scatter_(0, indices, 1)
         return one_hot

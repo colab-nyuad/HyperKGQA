@@ -13,12 +13,11 @@ from transformers import *
 
 
 class Dataset_SBERT(Dataset):
-    def __init__(self, data, word2idx, entity2idx, dtype):
+    def __init__(self, data, word2idx, entity2idx):
         self.data = data
         self.word2idx = word2idx
         self.entity2idx = entity2idx
         self.max_length = 128
-        self.d_type = dtype
         self.tokenizer = AutoTokenizer.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')
 
     def get_shape(self):
@@ -31,10 +30,7 @@ class Dataset_SBERT(Dataset):
         indices = torch.LongTensor(indices)
         batch_size = len(indices)
         vec_len = len(self.entity2idx)
-        if self.d_type == 'double':
-            one_hot = torch.DoubleTensor(vec_len)
-        else:
-            one_hot = torch.FloatTensor(vec_len)
+        one_hot = torch.FloatTensor(vec_len)
         one_hot.zero_()
         one_hot.scatter_(0, indices, 1)
         return one_hot
@@ -77,3 +73,4 @@ class Dataset_SBERT(Dataset):
 class DataLoader_SBERT(DataLoader):
     def __init__(self, *args, **kwargs):
         super(DataLoader_SBERT, self).__init__(*args, **kwargs)
+
