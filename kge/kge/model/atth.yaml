@@ -1,0 +1,12 @@
+import: [lookup_embedder, hyperbolic_relation_embedder]
+
+atth:
+  class_name: AttH
+  entity_embedder:
+    type: lookup_embedder
+    +++: +++
+  relation_embedder:
+    type: hyperbolic_relation_embedder
+    +++: +++
+  init_size: 1e-3
+

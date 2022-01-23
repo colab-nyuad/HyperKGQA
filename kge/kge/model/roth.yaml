@@ -1,0 +1,10 @@
+import: [lookup_embedder, hyperbolic_relation_embedder]
+
+roth:
+  class_name: RotH
+  entity_embedder:
+    type: lookup_embedder
+    +++: +++
+  relation_embedder:
+    type: hyperbolic_relation_embedder
+    +++: +++
