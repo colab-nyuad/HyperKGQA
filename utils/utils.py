@@ -24,12 +24,6 @@ def process_qa_file(text_file):
         for data_line in data_file.readlines():
             data_line = data_line.strip()
             data_line = data_line.strip().split('\t')
-
-            # to ignore questions with missing answers
-            if len(data_line) != 3: 
-                print(data_line)
-                continue
-
             question = re.sub('\[.+\]', 'NE', data_line[0])
             head = data_line[0].split('[')[1].split(']')[0]
             ans = data_line[1].split('|')
