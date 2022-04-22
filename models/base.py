@@ -31,10 +31,11 @@ class KGModel(nn.Module, ABC):
         self.data_type = torch.double if self.dtype == 'double' else torch.float
         self.gamma = nn.Parameter(torch.Tensor([args.gamma]), requires_grad=False)
         self.entity = nn.Embedding(args.sizes[0], self.rank, dtype=self.data_type)
-        self.rel = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type).requires_grad_(False)
+        self.rel = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type)
         self.bh = nn.Embedding(args.sizes[0], 1, dtype=self.data_type)
         self.bt = nn.Embedding(args.sizes[0], 1, dtype=self.data_type)
-        if self.freeze:
+        if self.freeze == True:
+            self.rel = self.rel.requires_grad_(False)
             self.entity = self.entity.requires_grad_(False)
             self.bh = self.bh.requires_grad_(False)
             self.bt = self.bt.requires_grad_(False)
@@ -53,7 +54,7 @@ class KGModel(nn.Module, ABC):
         return self.get_query(head), question
 
     @abstractmethod
-    def get_queries(self, head, question):
+    def get_queries(self, head, question, evaluate = False):
         """Compute embedding and biases of queries.
 
         Args:

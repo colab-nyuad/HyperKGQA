@@ -7,6 +7,7 @@ from torch import nn
 import pickle
 from scipy import spatial
 import networkx as nx
+from collections import Counter
 from utils.utils import get_relations_in_path
 from scipy.spatial import distance
 from sklearn.metrics.pairwise import cosine_similarity
@@ -33,13 +34,7 @@ class QAOptimizer(object):
         self.batch_size = args.batch_size
         self.max_epochs = args.max_epochs
         self.gamma = args.rel_gamma
-        self.score_func = nn.CosineSimilarity(dim=0, eps=1e-6)
         self.use_relation_matching = args.use_relation_matching
-
-        if args.similarity_type == 'cosine':
-            self.similarity_func = self.compute_score_cosine_similarity
-        else:
-            self.similarity_func = self.compute_score_intersection
 
     def calculate_loss(self, question, head, tail, question_param):
         pred = self.model.get_predictions(question, head, question_param)
@@ -47,6 +42,7 @@ class QAOptimizer(object):
 
         if self.model.ls:
             p_tail = ((1.0-self.model.ls)*p_tail) + (1.0/p_tail.size(1))
+
         loss = self.model.loss(pred, p_tail)
 
         if self.reg_weight > 0:
@@ -58,6 +54,7 @@ class QAOptimizer(object):
         data_gen = self.dataset.data_generator(samples)
         total_correct = 0
         predicted_answers = []
+        failed_answers = []
 
         for i in tqdm(range(len(samples))):
             d = next(data_gen)
@@ -87,19 +84,14 @@ class QAOptimizer(object):
             predicted_answers.append(pred_ans)
 
         accuracy = total_correct/len(samples)
+        print(accuracy)
         return accuracy, predicted_answers
 
 
-    def compute_score_intersection(self, candidate_rels, pruning_rels, relation_matrix):
-        return len(candidate_rels & pruning_rels)
-
-    def compute_score_cosine_similarity(self, candidate_rels, pruning_rels, relation_matrix):
-        return np.sum([self.score_func(relation_matrix[p], relation_matrix[c]).item() for c in candidate_rels for p in pruning_rels])
-
-    def compute_score(self, candidate_rels, pruning_rels, relation_matrix):
+    def compute_score(self, candidate_rels, pruning_rels):
         return len(candidate_rels & pruning_rels) / len(pruning_rels.union(candidate_rels))
 
-    def compute_score_with_relation_matching(self, samples, G, model, dataset, relation_matrix, idx2rel):
+    def compute_score_with_relation_matching(self, samples, G, model, dataset, idx2rel):
         data_gen = self.dataset.data_generator(samples)
         total_correct = 0
 
@@ -128,12 +120,15 @@ class QAOptimizer(object):
             pruning_rels_scores, pruning_rels_torch = torch.topk(rel_scores, 5)
             pruning_rels = [p.item() for s, p in zip(pruning_rels_scores, pruning_rels_torch) if s > self.thresh]
 
+            pred_ans_initial = candidates[np.argmax(scores)]
+
             if len(pruning_rels) > 0:
-                for i, tail in enumerate(candidates):
-                    candidate_rels = get_relations_in_path(G, head.item(), tail)
+                for j, tail in enumerate(candidates):
+                    candidate_rels, _ = get_relations_in_path(G, head.item(), tail)
                     if len(candidate_rels) > 0:
-                        score = self.compute_score(set(candidate_rels), set(pruning_rels), relation_matrix)
-                        scores[i] = scores[i] + self.gamma*score
+                        candidate_rels_names = [idx2rel[r] for r in candidate_rels]
+                        score = self.compute_score(set(candidate_rels), set(pruning_rels))
+                        scores[j] = scores[j] + self.gamma*score
 
             pred_ans = candidates[np.argmax(scores)]
 
@@ -142,6 +137,7 @@ class QAOptimizer(object):
 
             if pred_ans in ans:
                 total_correct += 1
+
         accuracy = total_correct/len(samples)
         print(accuracy)
         return accuracy
@@ -156,6 +152,7 @@ class QAOptimizer(object):
             question_param = a[1].to(self.device)
             head = a[2].to(self.device)
             tail = a[3].to(self.device)
+            path = a[4].to(self.device)
 
             loss = self.calculate_loss(question, head, tail, question_param)
             self.optimizer.zero_grad()

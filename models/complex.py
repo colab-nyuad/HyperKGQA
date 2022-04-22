@@ -16,12 +16,8 @@ class BaseC(KGModel):
         """Initialize a Complex KGModel."""
         super(BaseC, self).__init__(args)
         self.rank = self.rank // 2
-        if self.freeze:
-            self.embeddings = nn.ModuleList([nn.Embedding(args.sizes[0], 2 * self.rank, sparse=True, dtype=self.data_type).requires_grad_(False),
-                                             nn.Embedding(args.sizes[1], 2 * self.rank, sparse=True, dtype=self.data_type).requires_grad_(False)])
-        else:
-            self.embeddings = nn.ModuleList([nn.Embedding(args.sizes[0], 2 * self.rank, sparse=True, dtype=self.data_type),
-                                             nn.Embedding(args.sizes[1], 2 * self.rank, sparse=True, dtype=self.data_type).requires_grad_(False)])
+        self.embeddings = nn.ModuleList([nn.Embedding(args.sizes[0], 2 * self.rank, sparse=True, dtype=self.data_type).requires_grad_(not self.freeze),
+                                         nn.Embedding(args.sizes[1], 2 * self.rank, sparse=True, dtype=self.data_type).requires_grad_(not self.freeze)])
 
 
     def similarity_score(self, lhs_e, rhs_e):
@@ -49,6 +45,7 @@ class ComplEx(BaseC):
     def get_queries(self, head, question):
         """Compute embedding and biases of queries."""
         head_e, rel_e = self.get_embeddings(head, question)
+
         lhs_e = torch.cat([
             head_e[0] * rel_e[0] - head_e[1] * rel_e[1],
             head_e[0] * rel_e[1] + head_e[1] * rel_e[0]

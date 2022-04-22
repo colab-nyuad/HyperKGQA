@@ -12,19 +12,28 @@ from transformers import *
 
 class SBERT_PruningModel(nn.Module):
 
-    def __init__(self, args, rel2idx, vocab_size):
+    def __init__(self, args, rel2idx, vocab_size, pretrained_language_model):
         super(SBERT_PruningModel, self).__init__()
         self.rel2idx = rel2idx
         self.ls = args.labels_smoothing
 
         self.sbert_model = AutoModel.from_pretrained('sentence-transformers/bert-base-nli-mean-tokens')
-
+        self.pretrained_language_model = pretrained_language_model
         self.sbert_dim = 768
+        self.transformer_layer_1 = nn.TransformerEncoderLayer(d_model=self.sbert_dim, nhead=8)
+        self.transformer_layer_2 = nn.TransformerEncoderLayer(d_model=self.sbert_dim, nhead=8)
+        self.transformer_layer_3 = nn.TransformerEncoderLayer(d_model=self.sbert_dim, nhead=8)
+
         self.hidden2rel = nn.Linear(self.sbert_dim, len(self.rel2idx))
         self.loss = torch.nn.BCELoss(reduction='sum')
 
     def apply_nonLinear(self, input):
-        outputs = self.hidden2rel(input)
+        input = torch.unsqueeze(input, 0)
+        output = self.transformer_layer_1(input)
+        output = self.transformer_layer_2(output)
+        output = self.transformer_layer_3(output)
+        output = self.hidden2rel(output)
+        outputs = torch.squeeze(output, 0)
         return outputs
 
         # SentenceTransformer Mean Pooling - Take attention mask into account for correct averaging
@@ -37,15 +46,7 @@ class SBERT_PruningModel(nn.Module):
 
 
     def get_question_embedding(self, question_tokenized, attention_mask):
-        output = self.sbert_model(question_tokenized, attention_mask)
+        output = self.pretrained_language_model(question_tokenized, attention_mask)
         question_embedding = self.mean_pooling(output, attention_mask)
         return question_embedding
-
-
-    def get_score_ranked(self, question_tokenized, attention_mask):
-        question_embedding = self.get_question_embedding(question_tokenized, attention_mask)
-        prediction = self.apply_nonLinear(question_embedding)
-        prediction = torch.sigmoid(prediction).squeeze()
-        return prediction
-
 

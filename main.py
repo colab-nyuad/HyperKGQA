@@ -59,7 +59,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--optimizer", choices=["Adagrad", "Adam"], default="Adam", help="Optimizer"
+    "--optimizer", choices=["SparseAdam", "Adagrad", "Adam"], default="Adam", help="Optimizer"
 )
 
 parser.add_argument(
@@ -111,7 +111,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--qa_nn_type', default='LSTM', choices=['LSTM', 'RoBERTa', 'SBERT']
+    '--qa_nn_type', default='LSTM', choices=['LSTM', 'SBERT']
 )
 
 parser.add_argument(
@@ -119,7 +119,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--checkpoint_type', default='libkge', choices=['libkge', 'ldh'], help = "Checkpoint type"
+    '--checkpoint_type', default='ldh', choices=['libkge', 'ldh'], help = "Checkpoint type"
+)
+
+parser.add_argument(
+    '--rel_gamma', type=float, default=0.0, help = "Hyperparameter for relation matching"
 )
 
 
@@ -172,19 +176,15 @@ def train(optimizer, model, data_loader, scheduler, train_samples, valid_samples
                     print("Model has exceed patience or reached maximum epochs")
                     return
 
-def evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, pruning_model, dataset, entity2idx, rel2idx, relation_matrix):
-    train_triplets = read_kg_triplets(dataset_path, type = 'train')
-    valid_triplets = read_kg_triplets(dataset_path, type = 'valid')
-    test_triplets = read_kg_triplets(dataset_path, type = 'test')
-    triplets = np.vstack((train_triplets, valid_triplets))
-    triplets = np.vstack((triplets, test_triplets))
-    
-    G = create_graph(triplets, entity2idx, rel2idx)
+def evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, pruning_model, dataset, entity2idx, rel2idx):
+    triples = read_kg_triplets(dataset_path, type = 'train')
+    G = create_graph(triples, entity2idx, rel2idx)
     idx2rel = {v: k for k, v in rel2idx.items()}
-    qa_optimizer.compute_score_with_relation_matching(test_samples, G, pruning_model, dataset, relation_matrix, idx2rel)
+    idx2entity = {v: k for k, v in entity2idx.items()}
+    qa_optimizer.compute_score_with_relation_matching(test_samples, G, pruning_model, dataset, idx2rel)
 
 
-def train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2idx, vocab_size):
+def train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2idx, vocab_size, pretrained_language_model):
     checkpoint_prm_path =  "{}/{}/{}/pruning_model_{}.pt".format(checkpoints, args.dataset, args.kg_type, args.hops)
     
     train_samples = read_pruning_file('train', qa_dataset_path, rel2idx, args.hops)
@@ -193,7 +193,7 @@ def train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2i
 
     dataset = getattr(dataloaders, 'DatasetPruning_{}'.format(args.qa_nn_type))(train_samples, rel2idx, word2idx)
     data_loader = getattr(dataloaders, 'DataLoaderPruning_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=15)
-    model = (getattr(pruning_models, '{}_PruningModel'.format(args.qa_nn_type))(args, rel2idx, vocab_size)).to(device)
+    model = (getattr(pruning_models, '{}_PruningModel'.format(args.qa_nn_type))(args, rel2idx, vocab_size, pretrained_language_model)).to(device)
     optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.learning_rate)
     scheduler = ExponentialLR(optimizer, args.decay)
     optimizer = PruningOptimizer(args, model, optimizer, regularizer, dataset, device)
@@ -205,27 +205,28 @@ def train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2i
 if __name__ == "__main__":
     args = parser.parse_args()
 
-    ## Reading QA dataset
-    qa_dataset_path = '{}/{}'.format(data_path, args.dataset)
-    train_data, valid_data, test_data = read_qa_dataset(args.hops, qa_dataset_path)
-    train_samples, heads = process_text_file(train_data)
-    valid_samples, _ = process_text_file(valid_data)
-    test_samples, _ = process_text_file(test_data)
-
     ## Loading trained pretrained KG embeddings
     embedding_path = ('{}/{}/{}/{}/{}'.format(checkpoints, args.dataset, args.kg_type, args.model, args.dim))
     dataset_path = "{}/{}/{}".format(kg_data_path, args.dataset, args.kg_type)
     loader = CheckpointLoader(embedding_path, dataset_path, args.checkpoint_type)
     device = torch.device(args.gpu if args.use_cuda else "cpu")
-    entity2idx, rel2idx = loader.load_checkpoint(args)
+    entity2idx, rel2idx = loader.load_parameters(args)
+    print(rel2idx)
     embed_model = getattr(models, args.model)(args, device)
-    loader.load_data(embed_model)
+    loader.load_data(args, entity2idx, rel2idx, embed_model)
+
+    ## Reading QA dataset
+    qa_dataset_path = '{}/{}'.format(data_path, args.dataset)
+    train_data, valid_data, test_data = read_qa_dataset(args.hops, qa_dataset_path)
+    train_samples = process_qa_file(train_data)
+    valid_samples = process_qa_file(valid_data)
+    test_samples = process_qa_file(test_data)
 
     ## Create QA dataset 
     print('Process QA dataset')
-    word2idx,idx2word, max_len = get_vocab(train_samples)
+    word2idx,idx2word, max_len = get_vocab(np.vstack((np.vstack((train_samples, valid_samples)), test_samples)))
     vocab_size = len(word2idx)
-    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx)
+    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx, rel2idx)
     data_loader = getattr(dataloaders, 'DataLoader_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=20)
     
     ## Creat QA model
@@ -246,6 +247,6 @@ if __name__ == "__main__":
 
     if args.use_relation_matching:
         qa_optimizer.model = torch.load(checkpoint_path).to(device)
-        checkpoint_prm_path, dataset = train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2idx, vocab_size)
+        checkpoint_prm_path, dataset = train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2idx, vocab_size, qa_optimizer.model.ln_model)
         model = torch.load(checkpoint_prm_path).to(device)
-        evaluate_with_relation_matching(kg_data_path, qa_optimizer, test_samples, model, dataset, entity2idx, rel2idx, relation_matrix)
+        evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, model, dataset, entity2idx, rel2idx)

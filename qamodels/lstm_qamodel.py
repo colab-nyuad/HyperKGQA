@@ -25,7 +25,7 @@ class LSTM_QAmodel(Base_QAmodel):
         self.mid1 = 256
         self.mid2 = 256
 
-        self.GRU = nn.LSTM(self.rank, self.hidden_dim, self.n_layers, bidirectional=self.bidirectional, batch_first=True)
+        self.ln_model = nn.LSTM(self.rank, self.hidden_dim, self.n_layers, bidirectional=self.bidirectional, batch_first=True)
 
         self.hidden_dim = self.hidden_dim * 2
         self.lin1 = nn.Linear(self.hidden_dim, self.mid1)
@@ -48,7 +48,7 @@ class LSTM_QAmodel(Base_QAmodel):
         hidden = self.lin2(hidden)
         hidden = F.relu(hidden)
         outputs = self.hidden2rel(hidden)
-        
+
         if self.hyperbolic_layers:
             c = F.softplus(self.hidden2c(hidden))
             rel_diag = self.hidden2rel_diag(hidden)
@@ -65,7 +65,7 @@ class LSTM_QAmodel(Base_QAmodel):
         question_len = question_len.cpu()
         embeds = self.word_embeddings(question)
         packed_output = pack_padded_sequence(embeds, question_len, batch_first=True)
-        outputs, (hidden, cell_state) = self.GRU(packed_output)
+        outputs, (hidden, cell_state) = self.ln_model(packed_output)
         question_embedding = torch.cat([hidden[0,:,:], hidden[1,:,:]], dim=-1)
         return question_embedding
 

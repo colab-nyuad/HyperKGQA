@@ -6,7 +6,7 @@ setup(
     description="A knowledge graph embedding library",
     packages=["kge"],
     install_requires=[
-        "torch",
+#        "torch",
         "pyyaml",
         "networkx",
         "pandas",

@@ -24,9 +24,10 @@ class BaseH(KGModel):
         else:
             self.scale = torch.Tensor([1. / np.sqrt(self.rank)]).to(device)
 
-        self.rel = nn.Embedding(args.sizes[1], self.rank*2, dtype=self.data_type).requires_grad_(False)
-        self.rel_diag = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type).requires_grad_(False)
-        self.c = nn.Parameter(torch.ones((args.sizes[1], 1), dtype=self.data_type), requires_grad=False)
+        self.rel_diag = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type).requires_grad_(not self.freeze)
+        self.c = nn.Parameter(torch.ones((args.sizes[1], 1), dtype=self.data_type)).requires_grad_(not self.freeze)
+        self.rel = nn.Embedding(args.sizes[1], self.rank*2, dtype=self.data_type).requires_grad_(not self.freeze)
+        self.curv = nn.ParameterList([self.c])
  
     def get_rhs(self):
         return self.entity.weight, self.bt.weight
@@ -82,6 +83,7 @@ class AttH(BaseH):
         """Compute embedding and biases of queries."""
 
         head_e, rel_e = self.get_embeddings(head, question)
+        bh = self.bh(head)
         rot_mat, ref_mat = torch.chunk(rel_diag, 2, dim=1)
         rot_q = givens_rotations(rot_mat, head_e).view((-1, 1, self.rank))
         ref_q = givens_reflection(ref_mat, head_e).view((-1, 1, self.rank))
@@ -95,4 +97,4 @@ class AttH(BaseH):
         rel = expmap0(rel, c)
         res = project(mobius_add(lhs, rel, c), c)
 
-        return (res, c, self.bh(head))
+        return (res, c, bh)
