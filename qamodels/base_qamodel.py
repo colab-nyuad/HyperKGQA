@@ -20,6 +20,7 @@ class Base_QAmodel(nn.Module):
         super(Base_QAmodel, self).__init__()
         self.emb_model = model
         self.loss = torch.nn.BCELoss(reduction='sum')
+        self.rel_loss = torch.nn.MSELoss(reduction='sum')
         self.ls = args.labels_smoothing
         self.freeze = args.freeze
         self.relation_dim = args.dim
@@ -54,6 +55,14 @@ class Base_QAmodel(nn.Module):
 
     def get_score_ranked(self, head, question, question_param):
 
+        #question_embedding = self.get_question_embedding(question, question_param)
+        #relations_weights, hyperbolic_layers = self.apply_nonLinear(question_embedding)
+        #weights = relations_weights[:,None,:]
+        #rm = self.emb_model.rel.weight
+        #rm = rm.float().repeat(weights.shape[0], 1, 1)
+        #question_embedding = torch.bmm(weights, rm.float())
+        #question_embedding = question_embedding.squeeze(1)
+        
         question_embedding = self.get_question_embedding(question, question_param)
         question_embedding, hyperbolic_layers = self.apply_nonLinear(question_embedding)
         
@@ -70,5 +79,6 @@ class Base_QAmodel(nn.Module):
         rhs_e = self.emb_model.get_rhs()
         scores = self.emb_model.similarity_score(lhs_e, rhs_e)
 
-        return scores
+        return scores, None
+        #return scores, relations_weights
 

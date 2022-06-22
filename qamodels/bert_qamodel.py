@@ -27,11 +27,7 @@ class RoBERTa_QAmodel(Base_QAmodel):
             param.requires_grad = True
 
         # Hidden dimension rank is fixed
-        self.hidden_dim = 768
-        self.lin_dim = 512
-
-        self.lin1 = nn.Linear(self.hidden_dim, self.lin_dim)
-        self.lin2 = nn.Linear(self.lin_dim, self.lin_dim)
+        self.lin_dim = 768
 
         if self.hyperbolic_layers:
             self.hidden2c = nn.Linear(self.lin_dim, 1)
@@ -52,11 +48,7 @@ class RoBERTa_QAmodel(Base_QAmodel):
         )
 
 
-    def apply_nonLinear(self, input):
-        hidden = self.lin1(input)
-        hidden = F.relu(hidden)
-        hidden = self.lin2(hidden)
-        hidden = F.relu(hidden)
+    def apply_nonLinear(self, hidden):
         outputs = self.hidden2rel(hidden)
 
         if self.hyperbolic_layers:

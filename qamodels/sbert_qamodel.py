@@ -17,7 +17,7 @@ from transformers import RobertaConfig, RobertaModel
 
 class SBERT_QAmodel(Base_QAmodel):
 
-    def __init__(self, args, model, vocab_size):
+    def __init__(self, args, model, vocab_size, rel2idx):
 
         super(SBERT_QAmodel, self).__init__(args, model, vocab_size)
 
@@ -42,6 +42,7 @@ class SBERT_QAmodel(Base_QAmodel):
                 self.hidden2context = nn.Linear(self.lin_dim, self.relation_dim // 2)
                 self.hidden2rel_diag = nn.Linear(self.lin_dim, self.relation_dim)
 
+        #self.hidden2rel = nn.Linear(self.lin_dim, len(rel2idx))
         self.hidden2rel = nn.Linear(self.lin_dim, self.relation_dim)
         self.loss_ = torch.nn.KLDivLoss(reduction='sum')
 
@@ -50,8 +51,8 @@ class SBERT_QAmodel(Base_QAmodel):
             F.log_softmax(scores, dim=1), F.normalize(targets, p=1, dim=1)
         )
 
-    def apply_nonLinear(self, input):
-        hidden = self.lin1(input)
+    def apply_nonLinear(self, hidden):
+        hidden = self.lin1(hidden)
         hidden = F.relu(hidden)
         hidden = self.lin2(hidden)
         hidden = F.relu(hidden)
@@ -77,13 +78,12 @@ class SBERT_QAmodel(Base_QAmodel):
         sum_mask = torch.clamp(input_mask_expanded.sum(1), min=1e-9)
         return sum_embeddings / sum_mask
 
-
     def get_question_embedding(self, question_tokenized, attention_mask):
-        output = self.ln_model(question_tokenized, attention_mask)
-        question_embedding = self.mean_pooling(output, attention_mask)
+        question_embedding = self.ln_model(question_tokenized, attention_mask)
+        question_embedding = self.mean_pooling(question_embedding, attention_mask)
         return question_embedding
 
 
     def get_predictions(self, question, head, attention_mask):
-        pred = super().get_score_ranked(head, question, attention_mask)
-        return pred
+        pred, relation_weights = super().get_score_ranked(head, question, attention_mask)
+        return pred, relation_weights

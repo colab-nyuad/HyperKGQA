@@ -10,10 +10,10 @@ import numpy as np
 from torch.nn.init import xavier_normal_
 from transformers import *
 
-class SBERT_PruningModel(nn.Module):
+class RelationMatchingModel(nn.Module):
 
     def __init__(self, args, rel2idx, vocab_size, pretrained_language_model):
-        super(SBERT_PruningModel, self).__init__()
+        super(RelationMatchingModel, self).__init__()
         self.rel2idx = rel2idx
         self.ls = args.labels_smoothing
 
@@ -50,3 +50,8 @@ class SBERT_PruningModel(nn.Module):
         question_embedding = self.mean_pooling(output, attention_mask)
         return question_embedding
 
+    def get_score_ranked(self, question_tokenized, attention_mask):
+        question_embedding = self.get_question_embedding(question_tokenized, attention_mask)
+        prediction = self.apply_nonLinear(question_embedding)
+        prediction = torch.sigmoid(prediction).squeeze()
+        return prediction

@@ -47,7 +47,6 @@ class KGModel(nn.Module, ABC):
         head_e = self.entity(head)
         if len(head_e.shape) == 1:
             head_e = head_e.unsqueeze(0)
-
         return head_e
 
     def get_embeddings(self, head, question):

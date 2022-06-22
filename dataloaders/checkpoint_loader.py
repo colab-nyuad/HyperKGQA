@@ -41,7 +41,7 @@ class CheckpointLoader():
         rr = list(rel2idx.keys())
         for i, r in enumerate(rr):
             rel2idx[r + '_inv'] = i + len(rr)
-
+        print(rel2idx)
         return entity2idx, rel2idx
 
     def load_data(self, args, entity2idx, rel2idx, embed_model):
@@ -53,7 +53,7 @@ class CheckpointLoader():
         else:
             kge_checkpoint = load_checkpoint(checkpoint)
             kge_model = KgeModel.create_from(kge_checkpoint)
-            print('################ checkpoint loaded')
+            print('checkpoint loaded')
 
             bias = True if kge_model._entity_embedder.dim > args.dim else False
             entity_embedder = kge_model._entity_embedder
@@ -69,9 +69,10 @@ class CheckpointLoader():
             print('biases loaded')
 
             if hasattr(embed_model, 'embeddings'):
-                embed_model.embeddings[0] = nn.Embedding.from_pretrained(entity_embedder._embeddings.weight[:, :-2], freeze = args.freeze)
+                embed_model.embeddings[0] = nn.Embedding.from_pretrained(entity_embedder._embeddings.weight, freeze = args.freeze)
                 embed_model.embeddings[1] = nn.Embedding.from_pretrained(relation_embedder._embeddings.weight, freeze=args.freeze)
             else:
                 embed_model.entity = nn.Embedding.from_pretrained(entity_embedder._embeddings.weight[:, :-2], freeze = args.freeze)
                 embed_model.rel = nn.Embedding.from_pretrained(relation_embedder._embeddings.weight, freeze = args.freeze)
-            print('embeddings and relations loaded')
+
+        print('embeddings and relations loaded')

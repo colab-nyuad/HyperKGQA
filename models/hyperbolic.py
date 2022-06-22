@@ -24,10 +24,10 @@ class BaseH(KGModel):
         else:
             self.scale = torch.Tensor([1. / np.sqrt(self.rank)]).to(device)
 
-        self.rel_diag = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type).requires_grad_(not self.freeze)
-        self.c = nn.Parameter(torch.ones((args.sizes[1], 1), dtype=self.data_type)).requires_grad_(not self.freeze)
-        self.rel = nn.Embedding(args.sizes[1], self.rank*2, dtype=self.data_type).requires_grad_(not self.freeze)
-        self.curv = nn.ParameterList([self.c])
+        self.rel_diag = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type)
+        self.c = nn.Parameter(torch.ones((args.sizes[1], 1), dtype=self.data_type))
+        self.rel = nn.Embedding(args.sizes[1], self.rank*2, dtype=self.data_type).requires_grad_(self.freeze)
+        #self.curv = nn.ParameterList([self.c])
  
     def get_rhs(self):
         return self.entity.weight, self.bt.weight
@@ -76,8 +76,8 @@ class AttH(BaseH):
 
     def __init__(self, args, device):
         super(AttH, self).__init__(args, device)
-        self.rel_diag = nn.Embedding(args.sizes[1], 2 * self.rank, dtype=self.data_type).requires_grad_(False)
-        self.context_vec = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type).requires_grad_(False)
+        self.rel_diag = nn.Embedding(args.sizes[1], 2 * self.rank, dtype=self.data_type)
+        self.context_vec = nn.Embedding(args.sizes[1], self.rank, dtype=self.data_type)
 
     def get_queries(self, head, question, c, rel_diag, context_vec):
         """Compute embedding and biases of queries."""

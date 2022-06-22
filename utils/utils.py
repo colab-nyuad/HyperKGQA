@@ -26,8 +26,8 @@ def process_qa_file(text_file):
             data_line = data_line.strip().split('\t')
             question = re.sub('\[.+\]', 'NE', data_line[0])
             head = data_line[0].split('[')[1].split(']')[0]
-            ans = data_line[1].split('|')
-            paths = data_line[2].split('|')
+            ans = data_line[1].split('|') if len(data_line) >= 2 else [] # for test
+            paths = data_line[2].split('|') if len(data_line) == 3 else [] # for test
             data_array.append([head, question.strip(), ans, paths])
 
         return data_array
@@ -53,9 +53,9 @@ def read_kg_triplets(dataset, type):
 
 def create_graph(triplets, entity2idx, rel2idx, type='undirected'):
     G = nx.MultiGraph() if type == 'undirected' else nx.MultiDiGraph()
-    return add_triplets_to_graph(G, triplets, entity2idx, rel2idx)
+    return add_triplets_to_graph(G, triplets, entity2idx, rel2idx, type)
 
-def add_triplets_to_graph(G, triplets, entity2idx, rel2idx, strip=False):
+def add_triplets_to_graph(G, triplets, entity2idx, rel2idx, type, strip=False):
     for t in tqdm(triplets):
         if strip:
             t[0] = t[0].strip()
@@ -64,8 +64,11 @@ def add_triplets_to_graph(G, triplets, entity2idx, rel2idx, strip=False):
         e2 = entity2idx[t[2]]
         G.add_node(e1)
         G.add_node(e2)
-        G.add_edge(e1, e2, name=rel2idx[t[1]], weight=1)
+        G.add_edge(e1, e2, label=rel2idx[t[1]], weight=1)
+        if type == 'directed':
+            G.add_edge(e2, e1, label=rel2idx[t[1]+'_inv'], weight=1)
     return G
+
 
 def get_relations_in_path(G, head, tail):
     try:
@@ -73,25 +76,21 @@ def get_relations_in_path(G, head, tail):
         pathGraph = nx.path_graph(shortest_path)
         relations = []
         for ea in pathGraph.edges():
+            tmp = []
             n_edges = G.number_of_edges(ea[0], ea[1])
-            relations.extend([G.edges[ea[0], ea[1], i]['name'] for i in range(n_edges)])
+            rels = [G.edges[ea[0], ea[1], i]['label'] for i in range(n_edges)]
+            for r in rels:
+                if len(relations) > 0:
+                    for p in relations:
+                        e = [r]
+                        e.extend(p)
+                        tmp.append(e)
+                else:
+                    tmp.append([r])
+            relations = tmp
         return relations, pathGraph.edges()
     except nx.exception.NetworkXNoPath:
         return [], None
-
-def read_pruning_file(type, dataset_path, rel2idx, hops):
-    if hops != 0:
-        dataset_path += '/{}hop'.format(hops)
-
-    with open('{}/pruning_{}.txt'.format(dataset_path, type), 'r') as f:
-        data = []
-        for line in f:
-            line = line.strip().split('\t')
-            question = re.sub('\[.+\]', '', line[0])
-            rel_list = line[1].split('|')
-            rel_id_list = [rel2idx[rel] for rel in rel_list if rel in rel2idx]
-            data.append([question, rel_id_list])
-        return data
 
 def load_dict(inst_dict):
     inst2idx = {}
@@ -104,4 +103,3 @@ def load_dict(inst_dict):
             inst_name = line[1]
             inst2idx[inst_name] = inst_id
     return inst2idx
-

@@ -1,4 +1,5 @@
 import os
+import random
 import argparse
 import yaml
 from shutil import copyfile
@@ -15,20 +16,20 @@ from torch.optim.lr_scheduler import ExponentialLR, ReduceLROnPlateau
 import networkx as nx
 import ast
 import json
-
-import dataloaders
-import optimizers
-import qamodels
-import pruning_models
 import models
+import optimizers
 
 from kge.model import KgeModel
+from qamodels import SBERT_QAmodel
 from kge.util.io import load_checkpoint
-
+from relation_matching_models import RelationMatchingModel
 from utils.utils import *
 from models import all_models
-from dataloaders import CheckpointLoader
-from optimizers import QAOptimizer, PruningOptimizer
+from dataloaders import CheckpointLoader, QADataset, QADataLoader
+from optimizers import QAOptimizer, RelationMatchingOptimizer
+
+import xgboost as xgb
+from sklearn.metrics import mean_squared_error
 
 parser = argparse.ArgumentParser(
     description="Graph Embedding for Question Answering over Knowledge Graphs"
@@ -95,11 +96,11 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--num_workers', type=int, default=15, help=""
+    '--num_workers', type=int, default=1, help=""
 )
 
 parser.add_argument(
-    "--dim", default=20, type=int, help="Embedding dimension"
+    "--dim", default=5, type=int, help="Embedding dimension"
 )
 
 parser.add_argument(
@@ -111,14 +112,6 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--qa_nn_type', default='LSTM', choices=['LSTM', 'SBERT']
-)
-
-parser.add_argument(
-    '--use_relation_matching', type=str, help = "Use relation matching for QA task"
-)
-
-parser.add_argument(
     '--checkpoint_type', default='ldh', choices=['libkge', 'ldh'], help = "Checkpoint type"
 )
 
@@ -126,6 +119,13 @@ parser.add_argument(
     '--rel_gamma', type=float, default=0.0, help = "Hyperparameter for relation matching"
 )
 
+parser.add_argument(
+    '--freeze_ln', type=bool, default=False, help = "Freeze language model"
+)
+
+parser.add_argument(
+    '--linear_network_count', type=int, default=2, help = "Number of linear layers"
+)
 
 # Exporting enviromental variables
 
@@ -136,7 +136,7 @@ os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 #-------------------------------------
 
-def train(optimizer, model, data_loader, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_path):
+def train(optimizer, model, data_loader, train_samples, valid_samples, test_samples, args, checkpoint_path):
 
     best_score = -float("inf")
     no_update = 0
@@ -152,7 +152,6 @@ def train(optimizer, model, data_loader, scheduler, train_samples, valid_samples
                 model.train()
                 loader = tqdm(data_loader, total=len(data_loader), unit="batches")
                 score = optimizer.train(loader, epoch)
-                scheduler.step()
 
             elif phase=='valid':
                 model.eval()
@@ -176,31 +175,12 @@ def train(optimizer, model, data_loader, scheduler, train_samples, valid_samples
                     print("Model has exceed patience or reached maximum epochs")
                     return
 
+
 def evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, pruning_model, dataset, entity2idx, rel2idx):
     triples = read_kg_triplets(dataset_path, type = 'train')
-    G = create_graph(triples, entity2idx, rel2idx)
+    G = create_graph(triples, entity2idx, rel2idx, type='directed')
     idx2rel = {v: k for k, v in rel2idx.items()}
-    idx2entity = {v: k for k, v in entity2idx.items()}
     qa_optimizer.compute_score_with_relation_matching(test_samples, G, pruning_model, dataset, idx2rel)
-
-
-def train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2idx, vocab_size, pretrained_language_model):
-    checkpoint_prm_path =  "{}/{}/{}/pruning_model_{}.pt".format(checkpoints, args.dataset, args.kg_type, args.hops)
-    
-    train_samples = read_pruning_file('train', qa_dataset_path, rel2idx, args.hops)
-    valid_samples = read_pruning_file('valid', qa_dataset_path, rel2idx, args.hops)
-    test_samples = read_pruning_file('test', qa_dataset_path, rel2idx, args.hops)
-
-    dataset = getattr(dataloaders, 'DatasetPruning_{}'.format(args.qa_nn_type))(train_samples, rel2idx, word2idx)
-    data_loader = getattr(dataloaders, 'DataLoaderPruning_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=15)
-    model = (getattr(pruning_models, '{}_PruningModel'.format(args.qa_nn_type))(args, rel2idx, vocab_size, pretrained_language_model)).to(device)
-    optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.learning_rate)
-    scheduler = ExponentialLR(optimizer, args.decay)
-    optimizer = PruningOptimizer(args, model, optimizer, regularizer, dataset, device)
-    train(optimizer, model, data_loader, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_prm_path)
-
-    return checkpoint_prm_path, dataset
-
 
 if __name__ == "__main__":
     args = parser.parse_args()
@@ -211,7 +191,6 @@ if __name__ == "__main__":
     loader = CheckpointLoader(embedding_path, dataset_path, args.checkpoint_type)
     device = torch.device(args.gpu if args.use_cuda else "cpu")
     entity2idx, rel2idx = loader.load_parameters(args)
-    print(rel2idx)
     embed_model = getattr(models, args.model)(args, device)
     loader.load_data(args, entity2idx, rel2idx, embed_model)
 
@@ -222,31 +201,35 @@ if __name__ == "__main__":
     valid_samples = process_qa_file(valid_data)
     test_samples = process_qa_file(test_data)
 
-    ## Create QA dataset 
-    print('Process QA dataset')
+    ## Creating QA dataset 
+    print('Creating QA dataset')
     word2idx,idx2word, max_len = get_vocab(np.vstack((np.vstack((train_samples, valid_samples)), test_samples)))
     vocab_size = len(word2idx)
-    dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx, rel2idx)
-    data_loader = getattr(dataloaders, 'DataLoader_{}'.format(args.qa_nn_type))(dataset, batch_size=args.batch_size, shuffle=True, num_workers=20)
+    dataset = QADataset(train_samples, word2idx, entity2idx, rel2idx)
+    data_loader = QADataLoader(dataset, batch_size=args.batch_size, shuffle=True, num_workers=args.num_workers)
     
-    ## Creat QA model
+    ## Creating QA model
     print('Creating QA model')
-    qa_model = getattr(qamodels, '{}_QAmodel'.format(args.qa_nn_type))(args, embed_model, vocab_size)
+    qa_model = SBERT_QAmodel(args, embed_model, vocab_size, rel2idx)
     qa_model.to(device)
 
-    ## Create QA optimizer
+    ## Creating QA optimizer
     print('Creating QA optimizer')
     regularizer = getattr(optimizers, args.regularizer)(args.reg)
     optimizer = getattr(torch.optim, args.optimizer)(qa_model.parameters(), lr=args.learning_rate)
-    scheduler = ExponentialLR(optimizer, args.decay)
     qa_optimizer = QAOptimizer(args, qa_model, optimizer, regularizer, dataset, device)
 
-    ## Train the model
+    ## Training QA model
     checkpoint_path =  "{}/{}_{}.pt".format(embedding_path, args.model, args.hops)
-    train(qa_optimizer, qa_model, data_loader, scheduler, train_samples, valid_samples, test_samples, args, checkpoint_path)
+    train(qa_optimizer, qa_model, data_loader, train_samples, valid_samples, test_samples, args, checkpoint_path)
 
-    if args.use_relation_matching:
-        qa_optimizer.model = torch.load(checkpoint_path).to(device)
-        checkpoint_prm_path, dataset = train_relation_matching_model(args, qa_dataset_path, device, rel2idx, word2idx, vocab_size, qa_optimizer.model.ln_model)
-        model = torch.load(checkpoint_prm_path).to(device)
-        evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, model, dataset, entity2idx, rel2idx)
+    ## Train relation matching model
+    qa_optimizer.model = torch.load(checkpoint_path).to(device)
+    checkpoint_rels_path =  "{}/relation_matching_model_{}.pt".format(embedding_path, args.hops)
+    model = RelationMatchingModel(args, rel2idx, vocab_size, qa_optimizer.model.ln_model).to(device)
+    optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.learning_rate)
+    relation_matching_optimizer = RelationMatchingOptimizer(args, model, optimizer, regularizer, dataset, device)
+    train(relation_matching_optimizer, model, data_loader, train_samples, valid_samples, test_samples, args, checkpoint_rels_path)
+
+    relation_matching_model = torch.load(checkpoint_rels_path).to(device)
+    evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, relation_matching_model, dataset, entity2idx, rel2idx)

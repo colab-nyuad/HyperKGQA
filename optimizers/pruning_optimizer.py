@@ -6,7 +6,7 @@ from tqdm import tqdm
 from torch import nn
 import pickle
 
-class PruningOptimizer(object):
+class RelationMatchingOptimizer(object):
     """Knowledge Graph embedding model optimizer.
     KGOptimizers performs loss computations for one phase
     Attributes:
@@ -44,9 +44,9 @@ class PruningOptimizer(object):
         for i in tqdm(range(len(samples))):
             d = next(data_gen)
 
-            question = d[0].unsqueeze(0).to(self.device)
-            question_param = d[1].unsqueeze(0).to(self.device)
-            rel_id_list = d[2]
+            question = d[1].unsqueeze(0).to(self.device)
+            question_param = d[3].unsqueeze(0).to(self.device)
+            rel_id_list = d[4]
             scores = self.model.get_score_ranked(question, question_param)
             pred = torch.topk(scores, k=1)[1]
 
@@ -66,7 +66,8 @@ class PruningOptimizer(object):
         for i_batch, a in enumerate(loader):
             question = a[0].to(self.device)
             question_param = a[1].to(self.device)
-            rel_one_hot = a[2].to(self.device)
+            rel_one_hot = a[4].to(self.device)
+            rel_one_hot[rel_one_hot > 1] = 1
 
             loss = self.calculate_loss(question, question_param, rel_one_hot)
             self.optimizer.zero_grad()
