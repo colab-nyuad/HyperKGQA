@@ -2,7 +2,31 @@
 
 HyperKGQA proposes a technique that embeds a Knowledge Graph into the hyperbolic space  and  leverages  this  pre-trained  embeddings  to  map  questions' representation  into entities  and  relationships  space. An extensive set of experiments was run on two benchmark datasets using code published in this repository. The results show that the proposed  method  performs  better  than the state-of-the-art techniques when reasoning on arbitrary multi-hop questions over large sparse graphs.
 
+![](kg.jpg "KG architecture")
 
+### Quick start
+```sh
+# retrieve and install project in development mode
+git clone https://github.com/colab-nyuad/FinQA
+
+# set environment variables
+source set_env.sh
+```
+
+## Table of contents
+1. [Data](#data)
+2. [KG constraction](#kg)
+    1. [KG construction from CSV](#kg_csv)
+    2. [KG construction from RDF](#kg_rdf)
+3. [QA templates](#qa_templates)
+    1. [Constraints Format](#constraints)
+4. [QA dataset](#qa_dataset)
+5. [Evaluation](#evaluation)
+    1. [Training Embeddings](#embeddings)
+    2. [Running KGQA](#kgqa)
+6. [Results](#results)
+
+## Data <a name="data"></a>
 
 ### Installation
 ```sh
