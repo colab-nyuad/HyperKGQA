@@ -19,10 +19,11 @@ source set_env.sh
 
 ## Table of contents
 1. [Data](#data)
-2. [Computing embeddings](#emb)
-3. [Run KGQA](#kgqa)
-4. [Path matching](#pathmatching)
-5. [Results](#results)
+2. [Parameters](#usage)
+3. [Computing embeddings](#emb)
+4. [Run KGQA](#kgqa)
+5. [Path matching](#pathmatching)
+6. [Results](#results)
 
 ## Data <a name="data"></a>
 
