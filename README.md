@@ -19,32 +19,12 @@ source set_env.sh
 
 ## Table of contents
 1. [Data](#data)
-2. [KG constraction](#kg)
-    1. [KG construction from CSV](#kg_csv)
-    2. [KG construction from RDF](#kg_rdf)
-3. [QA templates](#qa_templates)
-    1. [Constraints Format](#constraints)
-4. [QA dataset](#qa_dataset)
-5. [Evaluation](#evaluation)
-    1. [Training Embeddings](#embeddings)
-    2. [Running KGQA](#kgqa)
-6. [Results](#results)
+2. [Computing embeddings](#emb)
+3. [Run KGQA](#kgqa)
+4. [Path matching](#pathmatching)
+5. [Results](#results)
 
 ## Data <a name="data"></a>
-
-### Avilable models
-This implementation includes the following models:
-- [ComplEx](http://proceedings.mlr.press/v48/trouillon16.pdf)
-- [RotataE](https://arxiv.org/pdf/1902.10197.pdf)
-- [TransE](https://papers.nips.cc/paper/2013/file/1cecc7a77928ca8133fa24680a88d2f9-Paper.pdf)
-- [Simple](https://arxiv.org/pdf/1802.04868.pdf)
-- [CP](https://arxiv.org/pdf/1806.07297.pdf)
-- [RESCAL](http://www.icml-2011.org/papers/438_icmlpaper.pdf)
-- [DistMult](https://www.microsoft.com/en-us/research/wp-content/uploads/2016/02/ICLR2015_updated.pdf)
-- [TuckER](https://arxiv.org/pdf/1901.09590.pdf)
-- [RotH](https://aclanthology.org/2020.acl-main.617.pdf)
-- [RefH](https://aclanthology.org/2020.acl-main.617.pdf)
-- [AttH](https://aclanthology.org/2020.acl-main.617.pdf)
 
 ### Datasets
 The repo presents results for two QA datasets MetaQA and WebQuestionsSP. For description of the underlying KGs please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). The datasets are availbale for download [here](https://drive.google.com/file/d/1_hAbc5EJX3N1wWs1lo--XJUS-QYv9g3M/view?usp=sharing). Unzip KGs datasets into kge/data and QA datasets into the folder data/QA_data.
