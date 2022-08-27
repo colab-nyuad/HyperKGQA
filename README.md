@@ -8,9 +8,12 @@ HyperKGQA proposes a technique that embeds a Knowledge Graph into the hyperbolic
 ### Quick start
 ```sh
 # retrieve and install project in development mode
-git clone https://github.com/colab-nyuad/FinQA
+git clone https://github.com/colab-nyuad/HyperKGQA.git
+cd kge
+pip install -e .
 
 # set environment variables
+cd ..
 source set_env.sh
 ```
 
@@ -29,17 +32,6 @@ source set_env.sh
 
 ## Data <a name="data"></a>
 
-### Installation
-```sh
-# retrieve and install project in development mode
-git clone https://github.com/colab-nyuad/Hyperbolic_KGQA.git
-cd kge
-pip install -e .
-
-# set environment variables
-cd ..
-source set_env.sh
-```
 ### Avilable models
 This implementation includes the following models:
 - [ComplEx](http://proceedings.mlr.press/v48/trouillon16.pdf)
