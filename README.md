@@ -26,7 +26,7 @@ source set_env.sh
 
 ## Data <a name="data"></a>
 
-The repo presents results for two QA datasets MetaQA and WebQuestionsSP. MetaQA dataset with its underlying KG can be downloaded [from](https://github.com/yuyuz/MetaQA). WebQuestionsSP dataset is available for download in json format from [here](https://www.microsoft.com/en-us/download/details.aspx?id=52763). The underlying KG for WebQuestionsSP was selected as a subset of Freebase KG with following running Page Rank algorithm to reduce the size of the graph. For the detailed description on this and download please refer to the baseline paper [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). Please unzip KGs datasets (train, valid and test files) into <em>kge/data/dataset_name</em> and <em>kg_data/dataset_name</em> and QA datasets (train, valid and test files) into the folder <em>qa_data/dataset_name</em>.
+The repo presents results for two QA datasets MetaQA and WebQuestionsSP. MetaQA dataset with its underlying KG can be downloaded [from](https://github.com/yuyuz/MetaQA). WebQuestionsSP dataset is available for download in json format from [here](https://www.microsoft.com/en-us/download/details.aspx?id=52763). The underlying KG for WebQuestionsSP was selected as a subset of Freebase KG with following running Page Rank algorithm to reduce the size of the graph. For the detailed description on this and download please refer to the baseline paper [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). Please unzip KGs datasets (train, valid and test files) into <em>kge/data/dataset_name</em> and <em>kg_data/dataset_name</em>. For QA datasets files, for WebQuestionsSP please put files into the folder <em>qa_data/dataset_name</em> and for MetaQA please put files in a subfolder indicating the number of hops, e.g., <em>qa_data/MetaQA/1hop/</em>.
 
 ## Parameters <a name="usage"></a>
 To train and evaluate a QA task over KG, use the main.py script:
@@ -113,7 +113,85 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
 ```
   
 ## Results <a name="results"></a>
-All results on KGQA are available in the manuscript. Please refer to the Tables 3-7. Here we present the results on Link Prediction:
+All results on KGQA are available in the manuscript. Please refer to the Tables 3-7. Here we present the results on Link Prediction.
+<table>
+    <thead>
+        <tr>
+            <th>Dataset</th>
+            <th>Setting</th>
+            <th>Dimension</th>
+            <th>Model</th>	
+            <th>MRR</th>	
+            <th>H@1</th>	
+            <th>H@3</th>
+            <th>H@10</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan=8>WQSP_KG</td>
+            <td rowspan=4>half</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>0.531</td>	
+            <td>0.494</td>	
+            <td>0.553</td>
+            <td>0.6</td>
+        </tr>
+        <tr>
+          <td>AttH</td>	
+          <td>0.579</td>
+          <td>0.539</td>	
+          <td>0.602</td>
+          <td>0.651</td>
+        </tr>
+        <tr>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>0.594</td>	
+            <td>0.567</td>	
+            <td>0.608</td>
+            <td>0.646</td>
+        </tr>
+        <tr>
+          <td>AttH</td>	
+          <td>0.585</td>
+          <td>0.541</td>	
+          <td>0.609</td>
+          <td>0.663</td>
+        </tr>
+        <tr>
+            <td rowspan=4>full</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>0.895</td>	
+            <td>0.844</td>	
+            <td>0.937</td>
+            <td>0.992</td>
+        </tr>
+          <td>AttH</td>	
+          <td>0.852</td>
+          <td>0.817</td>	
+          <td>0.869</td>
+          <td>0.918</td>
+        </tr>
+          <tr>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>0.98</td>	
+            <td>0.965</td>	
+            <td>0.996</td>
+            <td>0.999</td>
+        </tr>
+          <td>AttH</td>	
+          <td>0.85</td>
+          <td>0.819</td>	
+          <td>0.866</td>
+          <td>0.908</td>
+        </tr>
+    </tbody>
+</table>
+
 <table>
     <thead>
         <tr>
