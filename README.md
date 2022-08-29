@@ -56,11 +56,21 @@ The main script to run KGQA task is main.py, following we provide the descriptio
 
 ## Computing embeddings <a name="emb"></a>
 Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. 
+  
+  model.pt
 
 ## Run KGQA <a name="kgqa"></a>
 
 
 Example commands to run KGQA on MetaQA and WQSP are in the folder <strong>examples</strong>. Please not that the results presented in the Tables 4 and 5 include the postprocessing stage. To reproduce them, please run the commands in the files with suffix <em>with_relation_matching</em>.
+  
+QA model and relation matching checkpoints are saved in the same folder as embeddings. 
+  
+Current implementation can be run in two modes: question embedding and relation composition. To run the code in the mode of relation composition, please make the following changes: 
+<ul>
+  <li>1968. A great year!</li>
+  <li>I think 1969 was second best.</li>
+</ul>
   
 ## Results <a name="results"></a>
 All results on KGQA are available in the manuscript. Please refer to the Tables 3-7. Here we present the results on Link Prediction.
