@@ -59,13 +59,13 @@ Running the script main.py computes KG embeddings using [LibKGE](https://github.
 ## Run KGQA <a name="kgqa"></a>
 
 
-Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
+An example command to run KGQA on MetaQA dataset 1-hop questions for sparse setting, dimension 50 and ComplEx model. The postprocessing step (relation matching) will be done by default after the model is trained:  
 
 ```sh
-python main.py --dataset MetaQA --model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 \
---learning_rate_kgqa 0.0002 --hops 1 --qa_nn_type LSTM
+python main.py --dataset MetaQA --model ComplEx --dim 50 --kg_type half --valid_every 10 --max_epochs 50 --learning_rate 0.0005 checkpoint_type ldh --rel_gamma 9.5
 ```
 
+An example command to run KGQA on wqsp dataset 
 For Freebase:
 ```sh
 python main.py --dataset fbwq --model ComplEx --dim 50 --kg_type full --valid_every 10 --max_epochs 200 \
