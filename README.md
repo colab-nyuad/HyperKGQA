@@ -114,6 +114,7 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
   
 ## Results <a name="results"></a>
 All results on KGQA are available in the manuscript. Please refer to the Tables 3-7. Here we present the results on Link Prediction.
+
 For MetaQA KG:
 <table>
     <thead>
