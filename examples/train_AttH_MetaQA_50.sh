@@ -2,7 +2,7 @@
 python main.py \
             --dataset MetaQA \
             --model AttH \ 
-            --dim 400 \
+            --dim 50 \
             --kg_type full \
             --valid_every 10 \
             --max_epochs 50 \
