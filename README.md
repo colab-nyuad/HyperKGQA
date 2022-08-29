@@ -55,6 +55,85 @@ The main script to run KGQA task is main.py, following we provide the descriptio
 ```
 
 ## Computing embeddings <a name="emb"></a>
+To compute embeddings we used two libraries: [Low-Dimensional Hyperbolic Knowledge Graph Embeddings](https://github.com/HazyResearch/KGEmb) for MetaQA and [LibKGE](https://github.com/uma-pi1/kge) for wqsp. To compute embeddings for MetaQA please follow the [indicated repo](https://github.com/HazyResearch/KGEmb) with following parameters:
+
+<table>
+    <thead>
+        <tr>
+            <th>Setting</th>
+            <th>Dimension</th>
+            <th>Model</th>
+            <th>Optimizer</th>
+            <th>Negative Samples</th>
+            <th>Batch Size</th>
+            <th>Learning Rate</th>	
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan=4>half</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>Adagrad</td>	
+            <td>200</td>	
+            <td>256</td>
+            <td>0.1</td>
+        </tr>
+        <tr>
+          <td>AttH</td>	
+          <td>Adam</td>
+          <td>200</td>	
+          <td>256</td>
+          <td>0.005</td>
+        </tr>
+        <tr>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>SparseAdam</td>	
+            <td>100</td>	
+            <td>256</td>
+            <td>0.001</td>
+        </tr>
+        <tr>
+          <td>AttH</td>	
+          <td>Adam</td>
+          <td>100</td>	
+          <td>256</td>
+          <td>0.001</td>
+        </tr>
+        <tr>
+            <td rowspan=4>full</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>SparseAdam</td>	
+            <td>200</td>	
+            <td>256</td>
+            <td>0.005</td>
+        </tr>
+          <td>AttH</td>	
+          <td>Adam</td>
+          <td>200</td>	
+          <td>256</td>
+          <td>0.005</td>
+        </tr>
+          <tr>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>Adagrad</td>	
+            <td>150</td>	
+            <td>256</td>
+            <td>0.1</td>
+        </tr>
+          <td>AttH</td>	
+          <td>Adagrad</td>
+          <td>150</td>	
+          <td>256</td>
+          <td>0.1</td>
+        </tr>
+    </tbody>
+</table>
+
+
 Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. 
   
   model.pt
