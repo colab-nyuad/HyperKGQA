@@ -141,7 +141,82 @@ python preprocess/preprocess_default.py dataset_name_setting
 kge resume dataset_name_setting
 ```
 
-In the root directory we placed a sample config file that we used and following are the parameters: 
+In the root directory we placed a sample config file <em>config.yaml</em> that we used. Following are the parameters that we used:
+<table>
+    <thead>
+        <tr>
+            <th>Setting</th>
+            <th>Dimension</th>
+            <th>Model</th>
+            <th>Optimizer</th>
+            <th>Negative Samples</th>
+            <th>Batch Size</th>
+            <th>Learning Rate</th>	
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td rowspan=4>half</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>Adagrad</td>	
+            <td>200</td>	
+            <td>256</td>
+            <td>0.1</td>
+        </tr>
+        <tr>
+          <td>AttH</td>	
+          <td>Adam</td>
+          <td>200</td>	
+          <td>256</td>
+          <td>0.005</td>
+        </tr>
+        <tr>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>SparseAdam</td>	
+            <td>100</td>	
+            <td>256</td>
+            <td>0.001</td>
+        </tr>
+        <tr>
+          <td>AttH</td>	
+          <td>Adam</td>
+          <td>100</td>	
+          <td>256</td>
+          <td>0.001</td>
+        </tr>
+        <tr>
+            <td rowspan=4>full</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>SparseAdam</td>	
+            <td>200</td>	
+            <td>256</td>
+            <td>0.005</td>
+        </tr>
+          <td>AttH</td>	
+          <td>Adam</td>
+          <td>200</td>	
+          <td>256</td>
+          <td>0.005</td>
+        </tr>
+          <tr>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>Adagrad</td>	
+            <td>150</td>	
+            <td>256</td>
+            <td>0.1</td>
+        </tr>
+          <td>AttH</td>	
+          <td>Adagrad</td>
+          <td>150</td>	
+          <td>256</td>
+          <td>0.1</td>
+        </tr>
+    </tbody>
+</table>
 
 The computed embeddings should be placed in the path: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\>. The main script will search for a model.pt in this location and load embedding matricies. 
 
