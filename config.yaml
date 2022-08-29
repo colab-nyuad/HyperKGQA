@@ -1,0 +1,65 @@
+atth.entity_embedder:
+  normalize:
+    p: 2.0
+atth.entity_embedder.regularize_weight: 9e-12
+atth.relation_embedder:
+  normalize:
+    p: 2.0
+atth.relation_embedder.regularize_weight: 9e-12
+
+dataset:
+  name: wqsp_half
+entity_ranking:
+  metrics_per:
+    relation_type: true
+eval:
+  batch_size: 64
+hyperbolic_relation_embedder:
+  dim: 400
+  initialize: xavier_normal_
+  initialize_args:
+    xavier_normal_:
+      gain: 1.0
+      
+import:
+- atth
+- hyperbolic_relation_embedder
+- reciprocal_relations_model
+
+lookup_embedder:
+  dim: 400
+  initialize: xavier_normal_
+  initialize_args:
+    xavier_normal_:
+      gain: 1.0
+model: reciprocal_relations_model
+negative_sampling:
+  implementation: batch
+  num_samples:
+    o: 5000
+    s: 5000
+  shared: true
+  with_replacement: false
+reciprocal_relations_model:
+  base_model:
+    type: atth
+train:
+  auto_correct: true
+  batch_size: 5000
+  loss: kl
+  loss_arg: .nan
+  lr_scheduler: ReduceLROnPlateau
+  lr_scheduler_args:
+    factor: 0.95
+    mode: max
+    patience: 10
+    threshold: 0.0001
+  max_epochs: 200
+  optimizer: Adagrad
+  optimizer_args:
+    lr: 0.25
+  type: negative_sampling
+valid:
+  every: 5
+  filter_with_test: true
+  metric: mean_reciprocal_rank_filtered_with_test
