@@ -114,6 +114,7 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
   
 ## Results <a name="results"></a>
 All results on KGQA are available in the manuscript. Please refer to the Tables 3-7. Here we present the results on Link Prediction.
+For MetaQA KG:
 <table>
     <thead>
         <tr>
@@ -129,69 +130,70 @@ All results on KGQA are available in the manuscript. Please refer to the Tables 
     </thead>
     <tbody>
         <tr>
-            <td rowspan=8>WQSP_KG</td>
+            <td rowspan=8>MetaQA_KG</td>
             <td rowspan=4>half</td>
             <td rowspan=2>50</td>
             <td>ComplEx	</td>
-            <td>0.531</td>	
-            <td>0.494</td>	
-            <td>0.553</td>
-            <td>0.6</td>
+            <td>0.097</td>	
+            <td>0.069</td>	
+            <td>0.108</td>
+            <td>0.148</td>
         </tr>
         <tr>
           <td>AttH</td>	
-          <td>0.579</td>
-          <td>0.539</td>	
-          <td>0.602</td>
-          <td>0.651</td>
+          <td>0.112</td>
+          <td>0.072</td>	
+          <td>0.123</td>
+          <td>0.187</td>
         </tr>
         <tr>
             <td rowspan=2>400</td>
             <td>ComplEx	</td>
-            <td>0.594</td>	
-            <td>0.567</td>	
-            <td>0.608</td>
-            <td>0.646</td>
+            <td>0.123</td>	
+            <td>0.09</td>	
+            <td>0.133</td>
+            <td>0.185</td>
         </tr>
         <tr>
           <td>AttH</td>	
-          <td>0.585</td>
-          <td>0.541</td>	
-          <td>0.609</td>
-          <td>0.663</td>
+          <td>0.159</td>
+          <td>0.112</td>	
+          <td>0.176</td>
+          <td>0.249</td>
         </tr>
         <tr>
             <td rowspan=4>full</td>
             <td rowspan=2>50</td>
             <td>ComplEx	</td>
-            <td>0.895</td>	
-            <td>0.844</td>	
-            <td>0.937</td>
-            <td>0.992</td>
+            <td>0.99</td>	
+            <td>0.981</td>	
+            <td>0.999</td>
+            <td>0.1</td>
         </tr>
           <td>AttH</td>	
-          <td>0.852</td>
-          <td>0.817</td>	
-          <td>0.869</td>
-          <td>0.918</td>
+          <td>0.917</td>
+          <td>0.889</td>	
+          <td>0.937</td>
+          <td>0.96</td>
         </tr>
           <tr>
             <td rowspan=2>400</td>
             <td>ComplEx	</td>
-            <td>0.98</td>	
-            <td>0.965</td>	
-            <td>0.996</td>
-            <td>0.999</td>
+            <td>1</td>	
+            <td>1</td>	
+            <td>1</td>
+            <td>1</td>
         </tr>
           <td>AttH</td>	
-          <td>0.85</td>
-          <td>0.819</td>	
-          <td>0.866</td>
-          <td>0.908</td>
+          <td>0.992</td>
+          <td>0.985</td>	
+          <td>0.999</td>
+          <td>1</td>
         </tr>
     </tbody>
 </table>
 
+For WebQuestionsSP KG:
 <table>
     <thead>
         <tr>
