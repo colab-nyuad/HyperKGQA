@@ -120,11 +120,7 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    '--freeze_ln', type=bool, default=False, help = "Freeze language model"
-)
-
-parser.add_argument(
-    '--linear_network_count', type=int, default=2, help = "Number of linear layers"
+    '--use_relation_matching', default=False, type=bool, help="Use relation matching"
 )
 
 # Exporting enviromental variables
@@ -222,14 +218,15 @@ if __name__ == "__main__":
     ## Training QA model
     checkpoint_path =  "{}/{}_{}.pt".format(embedding_path, args.model, args.hops)
     train(qa_optimizer, qa_model, data_loader, train_samples, valid_samples, test_samples, args, checkpoint_path)
-
-    ## Train relation matching model
-    qa_optimizer.model = torch.load(checkpoint_path).to(device)
-    checkpoint_rels_path =  "{}/relation_matching_model_{}.pt".format(embedding_path, args.hops)
-    model = RelationMatchingModel(args, rel2idx, vocab_size, qa_optimizer.model.ln_model).to(device)
-    optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.learning_rate)
-    relation_matching_optimizer = RelationMatchingOptimizer(args, model, optimizer, regularizer, dataset, device)
-    train(relation_matching_optimizer, model, data_loader, train_samples, valid_samples, test_samples, args, checkpoint_rels_path)
-
-    relation_matching_model = torch.load(checkpoint_rels_path).to(device)
-    evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, relation_matching_model, dataset, entity2idx, rel2idx)
+    
+    if args.use_relation_matching == True:
+        ## Train relation matching model
+        qa_optimizer.model = torch.load(checkpoint_path).to(device)
+        checkpoint_rels_path =  "{}/relation_matching_model_{}.pt".format(embedding_path, args.hops)
+        model = RelationMatchingModel(args, rel2idx, vocab_size, qa_optimizer.model.ln_model).to(device)
+        optimizer = getattr(torch.optim, args.optimizer)(model.parameters(), lr=args.learning_rate)
+        relation_matching_optimizer = RelationMatchingOptimizer(args, model, optimizer, regularizer, dataset, device)
+        train(relation_matching_optimizer, model, data_loader, train_samples, valid_samples, test_samples, args, checkpoint_rels_path)
+        
+        relation_matching_model = torch.load(checkpoint_rels_path).to(device)
+        evaluate_with_relation_matching(dataset_path, qa_optimizer, test_samples, relation_matching_model, dataset, entity2idx, rel2idx)
