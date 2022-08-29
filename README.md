@@ -133,10 +133,17 @@ To compute embeddings we used two libraries: [Low-Dimensional Hyperbolic Knowled
     </tbody>
 </table>
 
+For wqsp, the embeddings can be computed in the current repo using LibKGE. Please place KG files in the folder <em>kge/data/dataset_name_setting</em>. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The config file should be placed inside the folder <em>kge/data/dataset_name_setting</em>. To compute embeddings please run the following commands:
 
-Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. 
-  
-  model.pt
+```sh
+cd kge/data
+python preprocess/preprocess_default.py dataset_name_setting
+kge resume dataset_name_setting
+```
+
+In the root directory we placed a sample config file that we used and following are the parameters: 
+
+The computed embeddings should be placed in the path: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\>. The main script will search for a model.pt in this location and load embedding matricies. 
 
 ## Run KGQA <a name="kgqa"></a>
   
