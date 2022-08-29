@@ -22,15 +22,13 @@ source set_env.sh
 2. [Parameters](#usage)
 3. [Computing embeddings](#emb)
 4. [Run KGQA](#kgqa)
-5. [Path matching](#pathmatching)
-6. [Results](#results)
+5. [Results](#results)
 
 ## Data <a name="data"></a>
 
-### Datasets
 The repo presents results for two QA datasets MetaQA and WebQuestionsSP. For description of the underlying KGs please refer to the baseline paper for more details [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). The datasets are availbale for download [here](https://drive.google.com/file/d/1_hAbc5EJX3N1wWs1lo--XJUS-QYv9g3M/view?usp=sharing). Unzip KGs datasets into kge/data and QA datasets into the folder data/QA_data.
 
-### Usage
+## Parameters <a name="usage"></a>
 To train and evaluate a QA task over KG, use the main.py script:
 
 ```sh
@@ -82,7 +80,11 @@ arguments:
 
 Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. 
 
-### Sample Commands
+## Computing embeddings <a name="emb"></a>
+
+## Run KGQA <a name="kgqa"></a>
+
+
 Following is an example command to run tarining KG embedding and QA task for sparse MetaQA dataset, dimension 200, AttH model and 1hop questions: 
 
 ```sh
@@ -110,60 +112,6 @@ python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_ever
 --learning_rate_kgqa 0.00002 --freeze True --batch_size 16 --qa_nn_type RoBERTa --use_relation_matching True
 ```
   
+## Results <a name="results"></a>
 
-### Using pretrained models
-
-In the following example, we load a saved kgqa checkpoint, evaluate its performance and print some questions from the dataset to explore the predicted answers.
-
-```python
-import argparse
-import numpy as np
-from utils.utils import *
-import dataloaders, qamodels
-from optimizers import QAOptimizer
-
-# Define parameters
-args = argparse.ArgumentParser().parse_args()
-args.hops = 2 # 0 for fbwq
-args.use_relation_matching = False
-args.qa_nn_type = 'LSTM'
-args.max_epochs = 100
-args.batch_size = 100
-n_q = 10
-
-# Specify paths to the file entity_ids and QA dataset
-entity_ids_path = 'kge/data/MetaQA_half/entity_ids.del'
-qa_dataset_path = 'data/QA_data/MetaQA'
-
-idx2entity = read_dict(entity_ids_path)
-entity2idx = read_inv_dict(entity_ids_path)
-
-# Load QA data
-train_data, _, test_data = read_qa_dataset(args.hops, qa_dataset_path)
-train_samples, _ = process_text_file(train_data)
-test_samples, _ = process_text_file(test_data)
-
-## Create QA dataset
-word2idx,idx2word, max_len = get_vocab(train_samples)
-vocab_size = len(word2idx)
-dataset = getattr(dataloaders, 'Dataset_{}'.format(args.qa_nn_type))(train_samples, word2idx, entity2idx)
-
-## Creat QA model
-device = torch.device(0)
-checkpoint_path = 'checkpoints/MetaQA_half_AttH_200_2.pt'
-qa_model = torch.load(checkpoint_path)
-
-## Create QA optimizer
-qa_optimizer = QAOptimizer(args, qa_model, None, None, dataset, device)
-
-score, predicted_answers = qa_optimizer.calculate_valid_loss(test_samples)
-print('test score' , score)
-
-## Print first n_q questions & predcited answers
-for i, t in enumerate(test_samples[:n_q]):
-    question = t[1].replace('NE', t[0])
-    print('Question: {} \n Predicted Answer: {} \n Answers: {} \n'.format(question, idx2entity[predicted_answers[i]], ','.join(t[2])))
-```
-
-
-### How to cite
+## How to cite
