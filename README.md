@@ -117,26 +117,77 @@ All results on KGQA are available in the manuscript. Please refer to the Tables 
 <table>
     <thead>
         <tr>
-            <th>Layer 1</th>
-            <th>Layer 2</th>
-            <th>Layer 3</th>
+            <th>Dataset</th>
+            <th>Setting</th>
+            <th>Dimension</th>
+            <th>Model</th>	
+            <th>MRR</th>	
+            <th>H@1</th>	
+            <th>H@3</th>
+            <th>H@10</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td rowspan=4>L1 Name</td>
-            <td rowspan=2>L2 Name A</td>
-            <td>L3 Name A</td>
+            <td rowspan=8>WQSP_KG</td>
+            <td rowspan=4>half</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>0.531</td>	
+            <td>0.494</td>	
+            <td>0.553</td>
+            <td>0.6</td>
         </tr>
         <tr>
-            <td>L3 Name B</td>
+          <td>AttH</td>	
+          <td>0.579</td>
+          <td>0.539</td>	
+          <td>0.602</td>
+          <td>0.651</td>
         </tr>
         <tr>
-            <td rowspan=2>L2 Name B</td>
-            <td>L3 Name C</td>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>0.594</td>	
+            <td>0.567</td>	
+            <td>0.608</td>
+            <td>0.646</td>
         </tr>
         <tr>
-            <td>L3 Name D</td>
+          <td>AttH</td>	
+          <td>0.585</td>
+          <td>0.541</td>	
+          <td>0.609</td>
+          <td>0.663</td>
+        </tr>
+        <tr>
+            <td rowspan=4>full</td>
+            <td rowspan=2>50</td>
+            <td>ComplEx	</td>
+            <td>0.895</td>	
+            <td>0.844</td>	
+            <td>0.937</td>
+            <td>0.992</td>
+        </tr>
+          <td>AttH</td>	
+          <td>0.852</td>
+          <td>0.817</td>	
+          <td>0.869</td>
+          <td>0.918</td>
+        </tr>
+          <tr>
+            <td rowspan=2>400</td>
+            <td>ComplEx	</td>
+            <td>0.98</td>	
+            <td>0.965</td>	
+            <td>0.996</td>
+            <td>0.999</td>
+        </tr>
+          <td>AttH</td>	
+          <td>0.85</td>
+          <td>0.819</td>	
+          <td>0.866</td>
+          <td>0.908</td>
         </tr>
     </tbody>
 </table>
