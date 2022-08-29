@@ -59,32 +59,7 @@ Running the script main.py computes KG embeddings using [LibKGE](https://github.
 ## Run KGQA <a name="kgqa"></a>
 
 
-An example command to run KGQA on MetaQA dataset 1-hop questions for sparse setting, dimension 50 and ComplEx model. The postprocessing step (relation matching) will be done by default after the model is trained:  
-
-```sh
-python main.py --dataset MetaQA --model ComplEx --dim 50 --kg_type half --valid_every 10 --max_epochs 50 --learning_rate 0.0005 checkpoint_type ldh --rel_gamma 9.5
-```
-
-An example command to run KGQA on wqsp dataset 
-For Freebase:
-```sh
-python main.py --dataset fbwq --model ComplEx --dim 50 --kg_type full --valid_every 10 --max_epochs 200 \
---learning_rate_kgqa 0.00002 --freeze True --batch_size 16 --qa_nn_type RoBERTa
-```
-  
-To use already pretrained embeddings, please specifiy the path to the folder with files checkpoint_best.pt, entity_ids.del and relation_ids.del:
-
-```sh
-python main.py --dataset MetaQA --embeddings data/pretrained_models/MetaQA/AttH_MetaQA_half_400/ \
---model AttH --dim 400 --kg_type half --valid_every 5 --max_epochs 200 --learning_rate_kgqa 0.0002 --hops 3 \
---qa_nn_type LSTM
-```
-  
-Compute performance with relation matching:
-```sh
-python main.py --dataset fbwq --model RefH --dim 400 --kg_type half --valid_every 10 --max_epochs 200 \
---learning_rate_kgqa 0.00002 --freeze True --batch_size 16 --qa_nn_type RoBERTa --use_relation_matching True
-```
+Example commands to run KGQA on MetaQA and WQSP are in the folder <strong>examples</strong>. Please not that the results presented in the Tables 4 and 5 include the postprocessing stage. To reproduce them, please run the commands in the files with suffix <em>with_relation_matching</em>.
   
 ## Results <a name="results"></a>
 All results on KGQA are available in the manuscript. Please refer to the Tables 3-7. Here we present the results on Link Prediction.
