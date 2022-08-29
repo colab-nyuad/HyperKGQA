@@ -32,25 +32,26 @@ The repo presents results for two QA datasets MetaQA and WebQuestionsSP. MetaQA 
 The main script to run KGQA task is main.py, following we provide the description of the parameters it has:
 
 ```sh
---dataset           the name of the dataset, should meatch folders created at the previous step
---hops              need to specified as int(1, 2 or 3) for MetaQA dataset
---kg_type           setting full or sparse
---model             an emdedding model (for all choices please refer to the file)
---regularizer       which regulariztion to use for KGQA
---reg               regularization weight
---optimizer         which optimizer to use (for all choices please refer to the file) 
---max_epochs        for how many epochs to train KGQA
---patience          number of epochs before early stopping
---valid_every       number of training phases before validation
---batch_size        batch size
---learning_rate     learning rate for KGQA
---freeze            freezing weights of trained embeddings
---use_cuda          use gpu
---gpu               which gpu to use
---num_workers       number of workers for dataloader
---dim               embedding dimension
---checkpoint_type   choices=['libkge', 'ldh'], depending on which library was used to compute embeddings 
---rel_gamma         hyperparameter for relation matching
+--dataset                 the name of the dataset, should meatch folders created at the previous step
+--hops                    need to specified as int(1, 2 or 3) for MetaQA dataset
+--kg_type                 setting full or sparse
+--model                   an emdedding model (for all choices please refer to the file)
+--regularizer             which regulariztion to use for KGQA
+--reg                     regularization weight
+--optimizer               which optimizer to use (for all choices please refer to the file) 
+--max_epochs              for how many epochs to train KGQA
+--patience                number of epochs before early stopping
+--valid_every             number of training phases before validation
+--batch_size              batch size
+--learning_rate           learning rate for KGQA
+--freeze                  freezing weights of trained embeddings
+--use_cuda                use gpu
+--gpu                     which gpu to use
+--num_workers             number of workers for dataloader
+--dim                     embedding dimension
+--checkpoint_type         choices=['libkge', 'ldh'], depending on which library was used to compute embeddings 
+--rel_gamma               hyperparameter for relation matching
+--use_relation_matching   use postproceesing or not 
 ```
 
 ## Computing embeddings <a name="emb"></a>
