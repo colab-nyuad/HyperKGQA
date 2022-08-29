@@ -26,61 +26,35 @@ source set_env.sh
 
 ## Data <a name="data"></a>
 
-The repo presents results for two QA datasets MetaQA and WebQuestionsSP. MetaQA dataset with its underlying KG can be downloaded [from](https://github.com/yuyuz/MetaQA). WebQuestionsSP dataset is available for download in json format from [here](https://www.microsoft.com/en-us/download/details.aspx?id=52763). The underlying KG for WebQuestionsSP was selected as a subset of Freebase KG with following running Page Rank algorithm to reduce the size of the graph. For the detailed description on this and download please refer to the baseline paper [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). Please unzip KGs datasets (train, valid and test files) into <em>kge/data/dataset_name</em> and <em>kg_data/dataset_name</em>. For QA datasets files, for WebQuestionsSP please put files into the folder <em>qa_data/dataset_name</em> and for MetaQA please put files in a subfolder indicating the number of hops, e.g., <em>qa_data/MetaQA/1hop/</em>.
+The repo presents results for two QA datasets MetaQA and WebQuestionsSP. MetaQA dataset with its underlying KG can be downloaded [from](https://github.com/yuyuz/MetaQA). WebQuestionsSP dataset is available for download in json format from [here](https://www.microsoft.com/en-us/download/details.aspx?id=52763). The underlying KG for WebQuestionsSP was selected as a subset of Freebase KG with following run of Page Rank algorithm to reduce the size of the graph. For the detailed description on this and download of full and sparse versions of KG please refer to the baseline paper [Improving Multi-hop Question Answering over Knowledge Graphs using Knowledge Base Embeddings](https://www.aclweb.org/anthology/2020.acl-main.412/). Please unzip KGs datasets (train, valid and test files) into <em>kg_data/dataset_name/setting</em>, where setting indicates full or half. For QA datasets files, for WebQuestionsSP please put files into the folder <em>qa_data/dataset_name</em> and for MetaQA please put files in a subfolder indicating the number of hops, e.g., <em>qa_data/MetaQA/1hop/</em>.
 
 ## Parameters <a name="usage"></a>
-To train and evaluate a QA task over KG, use the main.py script:
+The main script to run KGQA task is main.py, following we provide the description of the parameters it has:
 
 ```sh
-usage: main.py [-h] [--dataset DATASET] [--kg_type KG_TYPE]
-              [--model {TransE,RESCAL,CP,Distmult,SimplE,RotH,RefH,AttH,ComplEx,RotatE}]
-              [--hops HOPS] [--regularizer {L3}] 
-              [--reg REG] [--optimizer {Adagrad,Adam}]
-              [--max_epochs MAX_EPOCHS] [--valid_every VALID]
-              [--dim RANK] [--patience PATIENCE]
-              [--batch_size BATCH_SIZE]
-              [--learning_rate LEARNING_RATE]
-              [--freeze FREEZE] [--use_cuda USE_CUDA]
-              [--num_workers NUM_WORKERS]
-              [--qa_nn_type {LSTM,RoBERTa}] ---gpu GPU]
-              [--use_relation_matching USE_RELATION_MATCHING]
-              [--labels_smoothing LABELS_SMOOTHING]
- 
-Knowledge Graph QA
-
-arguments:
-  -h, --help            show this help message and exit
-  --dataset             Knowledge Graph dataset
-  --kg_type             Type of graph (full, sparse)
-  --model {TransE,RESCAL,CP,Distmult,SimplE,RotH,RefH,AttH,ComplEx,RotatE}
-                        Knowledge Graph embedding model and QA score function
-  --regularizer {L3}
-                        Regularizer
-  --reg                 Regularization weight
-  --optimizer {Adagrad,Adam}
-                        Optimizer
-  --max_epochs
-                        Maximum number of epochs
-  --patience            Number of epochs before early stopping for KG embeddings
-  --valid_every         Number of epochs before validation for QA task
-  --dim                 Embedding dimension
-  --batch_size          Batch size for QA task 
-  --learning_rate       Learning rate for QA task
-  --hops                Number of edges to reason over to reach the answer 
-  --freeze              Freeze weights of trained KG embeddings
-  --use_cuda            Use gpu
-  --gpu                 How many gpus to use
-  --num_workers         Number of workers for parallel computing 
-  --labels_smoothing    Labels smoothing
-  --qa_nn_type {LSTM,RoBERTa}
-                        Which NN to use for question embeddings
-  --use_relation_matching 
-                        Use relation matching for postprocessing candidates in QA task
+--dataset           the name of the dataset, should meatch folders created at the previous step
+--hops              need to specified as int(1, 2 or 3) for MetaQA dataset
+--kg_type           setting full or sparse
+--model             an emdedding model (for all choices please refer to the file)
+--regularizer       which regulariztion to use for KGQA
+--reg               regularization weight
+--optimizer         which optimizer to use (for all choices please refer to the file) 
+--max_epochs        for how many epochs to train KGQA
+--patience          number of epochs before early stopping
+--valid_every       number of training phases before validation
+--batch_size        batch size
+--learning_rate     learning rate for KGQA
+--freeze            freezing weights of trained embeddings
+--use_cuda          use gpu
+--gpu               which gpu to use
+--num_workers       number of workers for dataloader
+--dim               embedding dimension
+--checkpoint_type   choices=['libkge', 'ldh'], depending on which library was used to compute embeddings 
+--rel_gamma         hyperparameter for relation matching
 ```
 
-Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. 
-
 ## Computing embeddings <a name="emb"></a>
+Running the script main.py computes KG embeddings using [LibKGE](https://github.com/uma-pi1/kge) and QA task over KG. To compute the embeddings using LibKGE, training parameters (learning_rate, batch_size, optimizer_type, dropout, normalization_metric and etc.) need to be specified in a config file. The script checks if there is an uploaded config file in the fomrat: \<dataset\>\_\<kg_type\>\_\<model\>\_\<dim\> in the folder kge/data/config_files/<dataset> to use for training embeddings. If the file not found, the config will be created from the input arguments. 
 
 ## Run KGQA <a name="kgqa"></a>
 
