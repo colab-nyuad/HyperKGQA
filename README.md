@@ -51,7 +51,7 @@ The main script to run KGQA task is main.py, following we provide the descriptio
 --dim                     embedding dimension
 --checkpoint_type         choices=['libkge', 'ldh'], depending on which library was used to compute embeddings 
 --rel_gamma               hyperparameter for relation matching
---use_relation_matching   use postproceesing or not 
+--use_relation_matching   use postprocessing or not 
 ```
 
 ## Computing embeddings <a name="emb"></a>
@@ -60,17 +60,17 @@ Running the script main.py computes KG embeddings using [LibKGE](https://github.
   model.pt
 
 ## Run KGQA <a name="kgqa"></a>
-
-
-Example commands to run KGQA on MetaQA and WQSP are in the folder <strong>examples</strong>. Please not that the results presented in the Tables 4 and 5 include the postprocessing stage. To reproduce them, please run the commands in the files with suffix <em>with_relation_matching</em>.
-  
-QA model and relation matching checkpoints are saved in the same folder as embeddings. 
   
 Current implementation can be run in two modes: question embedding and relation composition. To run the code in the mode of relation composition, please make the following changes: 
 <ul>
-  <li>1968. A great year!</li>
-  <li>I think 1969 was second best.</li>
+  <li>In the file qamodels/base_qamodel.py please uncomment lines 58-64,83 and comment the lines 66-67,82 </li>
+  <li>In the file qamodel/sbert_qamodel.py please uncomment line 45 and comment line 46</li>
+  <li>In the file optimizers/optimizer.py please uncomment lines 50-51 and comment line 48</li>
 </ul>
+
+Example commands to run KGQA on MetaQA and WQSP are in the folder <strong>examples</strong>. Please not that the results presented in the Tables 4 and 5 include the postprocessing stage. To reproduce them, please run the commands in the files with suffix <em>with_relation_matching</em> in the mode of relation composition.
+  
+QA model and relation matching checkpoints are saved in the same folder as embeddings. 
   
 ## Results <a name="results"></a>
 All results on KGQA are available in the manuscript. Please refer to the Tables 3-7. Here we present the results on Link Prediction.
