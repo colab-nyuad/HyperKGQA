@@ -143,77 +143,35 @@ kge resume dataset_name_setting
 
 In the root directory we placed a sample config file <em>config.yaml</em> that we used. Following are the parameters that we used:
 <table>
-    <thead>
+    <thead>						
         <tr>
             <th>Setting</th>
-            <th>Dimension</th>
             <th>Model</th>
-            <th>Optimizer</th>
-            <th>Negative Samples</th>
-            <th>Batch Size</th>
-            <th>Learning Rate</th>	
+            <th>normalize.p</th>
+            <th>regularize_weight</th>
         </tr>
     </thead>
     <tbody>
         <tr>
-            <td rowspan=4>half</td>
-            <td rowspan=2>50</td>
+            <td rowspan=2>half</td>
             <td>ComplEx	</td>
-            <td>Adagrad</td>	
-            <td>200</td>	
-            <td>256</td>
-            <td>0.1</td>
+            <td>-1.0</td>	
+            <td>9e-10</td>	
         </tr>
         <tr>
           <td>AttH</td>	
-          <td>Adam</td>
-          <td>200</td>	
-          <td>256</td>
-          <td>0.005</td>
+          <td>2.0</td>
+          <td>9e-12</td>	
         </tr>
-        <tr>
-            <td rowspan=2>400</td>
+        <tr>						
+            <td rowspan=2>full</td>
             <td>ComplEx	</td>
-            <td>SparseAdam</td>	
-            <td>100</td>	
-            <td>256</td>
-            <td>0.001</td>
-        </tr>
-        <tr>
-          <td>AttH</td>	
-          <td>Adam</td>
-          <td>100</td>	
-          <td>256</td>
-          <td>0.001</td>
-        </tr>
-        <tr>
-            <td rowspan=4>full</td>
-            <td rowspan=2>50</td>
-            <td>ComplEx	</td>
-            <td>SparseAdam</td>	
-            <td>200</td>	
-            <td>256</td>
-            <td>0.005</td>
+            <td>-1.0</td>	
+            <td>9e-10</td>	
         </tr>
           <td>AttH</td>	
-          <td>Adam</td>
-          <td>200</td>	
-          <td>256</td>
-          <td>0.005</td>
-        </tr>
-          <tr>
-            <td rowspan=2>400</td>
-            <td>ComplEx	</td>
-            <td>Adagrad</td>	
-            <td>150</td>	
-            <td>256</td>
-            <td>0.1</td>
-        </tr>
-          <td>AttH</td>	
-          <td>Adagrad</td>
-          <td>150</td>	
-          <td>256</td>
-          <td>0.1</td>
+          <td>2.0</td>
+          <td>9e-09</td>	
         </tr>
     </tbody>
 </table>
